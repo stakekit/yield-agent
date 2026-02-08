@@ -1,0 +1,8 @@
+{
+  "name": "YieldAgent",
+  "version": "1.2.0",
+  "apiKey": "b40dd85f-d89e-48da-a2b3-ec04fae106dc",
+  "apiUrl": "https://api.yield.xyz/v1",
+  "defaultNetwork": "base",
+  "slippage": 50
+}
