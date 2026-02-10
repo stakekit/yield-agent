@@ -36,11 +36,12 @@ A free API key is included in `skill.json`.
 ## Files
 
 - `SKILL.md` — Main skill definition (agent reads this first)
-- `references/safety.md` — Safety checks and constraints
-- `HEARTBEAT.md` — Periodic position monitoring add-on
-- `references/superskill.md` — 40 advanced agent capabilities add-on
-- `skill.json` — API key and settings
+- `skill.json` — Manifest, API key, triggers
+- `HEARTBEAT.md` — Periodic monitoring add-on
+- `scripts/` — 7 bash scripts
 - `references/openapi.yaml` — OpenAPI spec (source of truth for types)
+- `references/safety.md` — Safety checks and guardrails
+- `references/superskill.md` — 40 advanced agent capabilities
 - `references/chain-formats.md` — Unsigned transaction formats per chain
 - `references/wallet-integration.md` — Wallet setup and signing flow
 - `references/examples.md` — Agent conversation patterns
