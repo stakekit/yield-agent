@@ -123,5 +123,5 @@ UNSIGNED_TX=$(echo "$ACTION" | jq -r '.transactions[0].unsignedTransaction')
 curl -X POST "https://api.bankr.bot/agent/submit" \
   -H "Authorization: Bearer $BANKR_API_KEY" \
   -H "Content-Type: application/json" \
-  -d "{\"transaction\": $UNSIGNED_TX}"
+  -d "$(jq -n --arg tx "$UNSIGNED_TX" '{transaction: $tx}')"
 ```

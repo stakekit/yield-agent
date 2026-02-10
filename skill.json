@@ -48,8 +48,7 @@
     "emoji": "📈",
     "category": "finance",
     "requires": {
-      "bins": ["curl", "jq"],
-      "env": ["YIELDS_API_KEY"]
+      "bins": ["curl", "jq"]
     },
     "triggers": [
       "find yields",
