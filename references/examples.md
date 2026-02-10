@@ -451,50 +451,6 @@ These are real conversation flows showing how an agent uses the yield-agent skil
 
 ---
 
-## Curated Base Yields (2%+ APY, Verified Live)
-
-These are the top trusted yield opportunities on Base, verified against the live Yield.xyz API. All support easy deposit and exit.
-
-### USDC Yields
-
-| Protocol | APY | Yield ID | Type | Fee |
-|----------|-----|----------|------|-----|
-| Morpho (Flagship) | 5.72% | `base-usdc-cousdc-0x1d3b1cd0a0f242d598834b3f2d126dc6bd774657-4626-vault` | Vault | 10% perf |
-| Morpho (MEV Capital) | 4.91% | `base-usdc-mevfusdc-0x8773447e6369472d9b72f064ea62e405216e9084-4626-vault` | Vault | 10% perf |
-| Morpho (ExtraFi) | 4.80% | `base-usdc-exmusdc-0x23479229e52ab6aad312d0b03df9f33b46753b5e-4626-vault` | Vault | 10% perf |
-| Morpho (Gauntlet) | 4.36% | `base-usdc-gtusdcf-0x236919f11ff9ea9550a4287696c2fc9e18e6e890-4626-vault` | Vault | 10% perf |
-| Morpho (Apostle) | 4.32% | `base-usdc-apusdc-0x75e1a1f9535c01cdce25e51ea4aff0d171337e1f-4626-vault` | Vault | 10% perf |
-| Morpho (CSBOR) | 4.32% | `base-usdc-csborusdc-0x43e623ff7d14d5b105f7be9c488f36dbf11d1f46-4626-vault` | Vault | 10% perf |
-| Morpho (RE7) | 3.87% | `base-usdc-re7usdc-0x12afdefb2237a5963e7bab3e2d46ad0eee70406e-4626-vault` | Vault | 10% perf |
-| Aave v3 | 3.82% | `base-usdc-aave-v3-lending` | Lending | None |
-| Morpho (Spark) | 3.78% | `base-usdc-sparkusdc-0x7bfa7c4f149e7415b73bdedfe609237e29cbf34a-4626-vault` | Vault | 10% perf |
-| Compound v3 | 3.19% | `base-usdc-compound-v3-lending` | Lending | None |
-
-### ETH / WETH Yields
-
-| Protocol | APY | Yield ID | Type | Fee |
-|----------|-----|----------|------|-----|
-| Morpho (9Summits Core) | 7.06% | `base-weth-9sethcore-0x5496b42ad0decebfab0db944d83260e60d54f667-4626-vault` | Vault | 10% perf |
-| KelpDAO (rsETH) | 2.95% | `base-kelpdao-rseth-staking` | Restaking | None |
-| Morpho (Steakhouse) | 2.77% | `base-weth-cseth-0x09832347586e238841f49149c84d121bc2191c53-4626-vault` | Vault | 10% perf |
-| Renzo (ezETH) | 2.68% | `base-renzo-ezeth-staking` | Restaking | None |
-| Morpho | 2.31% | `base-weth-exmweth-0x5a32099837d89e3a794a44fb131cbbad41f87a8c-4626-vault` | Vault | 10% perf |
-
-### Other Notable Yields
-
-| Token | Protocol | APY | Yield ID | Type |
-|-------|----------|-----|----------|------|
-| USDA | Angle (stUSD) | 10.10% | `base-usda-stusd-0x0022228a2cc5e7ef0274a7baa600d44da5ab5776-4626-vault` | Vault |
-| USDC | Euler | 5.68% | `base-usdc-eusdc-29-0x085178078796da17b191f9081b5e2fccc79a7ee7-4626-vault` | Vault |
-| USDC | Euler | 5.02% | `base-usdc-eusdc-49-0x4c1aeda9b43efcf1da1d1755b18802aabe90f61e-4626-vault` | Vault |
-| cbBTC | Euler | 4.02% | `base-cbbtc-ecbbtc-7-0xe72ea97aaf905c5f10040f78887cc8de8eaec7e4-4626-vault` | Vault |
-| WETH | Euler (Yo Protocol) | 2.80% | `base-weth-eweth-20-0xf3bb6b0a9beaf9240d7f4a91341d5df6bf37caea-4626-vault` | Vault |
-| GHO | Aave v3 | 2.10% | `base-gho-aave-v3-lending` | Lending |
-
-> **Note:** APYs are live snapshots and fluctuate. Morpho vault performance fees (typically 10%) are already deducted from the displayed APY. Use `./scripts/find-yields.sh base <TOKEN>` to get current rates.
-
----
-
 ## API Reference Examples
 
 ### Discovery with Pagination
@@ -539,14 +495,14 @@ The API handles decimal conversion internally. No need to know token decimals.
 
 ### Environment Variable Overrides
 
-Override config.json values without editing the file:
+Override skill.json values without editing the file:
 
 ```bash
 export YIELDS_API_KEY="your-custom-key"
 export YIELDS_API_URL="https://api.stakek.it"
 export YIELD_NETWORK="ethereum"
 
-./scripts/find-yields.sh    # Uses env vars instead of config.json
+./scripts/find-yields.sh    # Uses env vars instead of skill.json
 ```
 
 ---
@@ -627,7 +583,7 @@ Signing, gas management, and nonce handling are the wallet skill's responsibilit
 
 ## Implementation Checklist
 
-- [ ] API key in config.json (included by default)
+- [ ] API key in skill.json (included by default)
 - [ ] Scripts executable (`chmod +x scripts/*.sh`)
 - [ ] `jq` and `curl` installed
 - [ ] Wallet skill configured for signing

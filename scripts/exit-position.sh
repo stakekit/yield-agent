@@ -12,19 +12,19 @@
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 CONFIG_DIR=""
 for dir in "${SCRIPT_DIR}/.." "${HOME}/.openclaw/skills/yield-agent" "${HOME}/.clawhub/skills/yield-agent" "${HOME}/.clawdbot/skills/yield-agent"; do
-  if [ -f "${dir}/config.json" ]; then
+  if [ -f "${dir}/skill.json" ]; then
     CONFIG_DIR="$dir"
     break
   fi
 done
 if [ -z "$CONFIG_DIR" ]; then
-  echo "Error: config.json not found. Run from the yield-agent directory or install to ~/.clawhub/skills/yield-agent/"
+  echo "Error: skill.json not found. Run from the yield-agent directory or install to ~/.clawhub/skills/yield-agent/"
   exit 1
 fi
 
 # Load config
-API_KEY="${YIELDS_API_KEY:-$(jq -r '.apiKey' "${CONFIG_DIR}/config.json")}"
-API_URL="${YIELDS_API_URL:-$(jq -r '.apiUrl' "${CONFIG_DIR}/config.json")}"
+API_KEY="${YIELDS_API_KEY:-$(jq -r '.api.apiKey' "${CONFIG_DIR}/skill.json")}"
+API_URL="${YIELDS_API_URL:-$(jq -r '.api.baseUrl' "${CONFIG_DIR}/skill.json")}"
 
 YIELD_ID=$1
 ADDRESS=$2

@@ -19,18 +19,18 @@
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 CONFIG_DIR=""
 for dir in "${SCRIPT_DIR}/.." "${HOME}/.openclaw/skills/yield-agent" "${HOME}/.clawhub/skills/yield-agent" "${HOME}/.clawdbot/skills/yield-agent"; do
-  if [ -f "${dir}/config.json" ]; then
+  if [ -f "${dir}/skill.json" ]; then
     CONFIG_DIR="$dir"
     break
   fi
 done
 if [ -z "$CONFIG_DIR" ]; then
-  echo "Error: config.json not found. Run from the yield-agent directory or install to ~/.clawhub/skills/yield-agent/"
+  echo "Error: skill.json not found. Run from the yield-agent directory or install to ~/.clawhub/skills/yield-agent/"
   exit 1
 fi
 
-API_KEY="${YIELDS_API_KEY:-$(jq -r '.apiKey' "${CONFIG_DIR}/config.json")}"
-API_URL="${YIELDS_API_URL:-$(jq -r '.apiUrl' "${CONFIG_DIR}/config.json")}"
+API_KEY="${YIELDS_API_KEY:-$(jq -r '.api.apiKey' "${CONFIG_DIR}/skill.json")}"
+API_URL="${YIELDS_API_URL:-$(jq -r '.api.baseUrl' "${CONFIG_DIR}/skill.json")}"
 
 YIELD_ID=$1
 
@@ -62,7 +62,7 @@ if [ "$HTTP_CODE" != "200" ]; then
   echo ""
   echo "Common causes:"
   echo "  - Invalid yield ID (use find-yields.sh to discover valid IDs)"
-  echo "  - API key issue (check config.json or YIELDS_API_KEY env var)"
+  echo "  - API key issue (check skill.json or YIELDS_API_KEY env var)"
   exit 1
 fi
 
@@ -70,11 +70,12 @@ echo "=== Yield Info: $YIELD_ID ==="
 echo ""
 
 echo "--- Basic Details ---"
-echo "$BODY" | jq -r '"Protocol:    \(.metadata.name // .metadata.protocol // "Unknown")
-Type:        \(.type // "Unknown")
+echo "$BODY" | jq -r '"Name:        \(.metadata.name // "Unknown")
+Provider:    \(.providerId // "Unknown")
+Type:        \(.mechanics.type // "Unknown")
 Network:     \(.network // "Unknown")
-Status:      \(.status // "Unknown")
-APY:         \(.apy // "N/A")"'
+Status:      enter=\(.status.enter // false), exit=\(.status.exit // false)
+Rate (\(.rewardRate.rateType // "APR")): \(.rewardRate.total // "N/A")"'
 
 echo ""
 echo "--- Token ---"
