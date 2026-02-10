@@ -88,10 +88,10 @@ if [ "$SUMMARY" = true ]; then
   echo "$RESPONSE" | jq -r '.items[] |
     [
       .id,
-      (.type // "?"),
-      (if .apy then (.apy * 100 | tostring | split(".") | .[0] + "." + (.[1] // "00" | .[:2]) + "%") else "N/A" end),
+      (.mechanics.type // "?"),
+      (if .rewardRate.total then (.rewardRate.total * 100 | tostring | split(".") | .[0] + "." + (.[1] // "00" | .[:2]) + "%") else "N/A" end),
       (.token.decimals // "?" | tostring),
-      (.args.enter.args.amount.minimum // "none")
+      (.mechanics.entryLimits.minimum // "none")
     ] | @tsv' | while IFS=$'\t' read -r ID TYPE APY DECIMALS MIN; do
     printf "%-55s | %-8s | %8s | %4s | %s\n" "$ID" "$TYPE" "$APY" "$DECIMALS" "$MIN"
   done

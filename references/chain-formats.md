@@ -1,6 +1,6 @@
 ## Unsigned Transaction Formats by Chain
 
-The `unsignedTransaction` field in the API response is encoded differently for each blockchain family. This section documents the **exact format** returned by the API, derived from the `libs/chains` source code.
+The `unsignedTransaction` field in the API response is encoded differently for each blockchain family.
 
 ### EVM Chains (Ethereum, Base, Arbitrum, Optimism, Polygon, Avalanche, BSC, Linea, zkSync, Sonic, etc.)
 
@@ -28,7 +28,7 @@ The `unsignedTransaction` field in the API response is encoded differently for e
 | to | string | Contract/recipient address |
 | data | string | Hex-encoded calldata |
 | value | string | Amount in wei (usually "0" for token operations) |
-| gasLimit | string | Gas limit (add 30% safety margin before signing) |
+| gasLimit | string | Gas limit |
 | nonce | number | Transaction nonce |
 | chainId | number | Network chain ID (e.g., 1=Ethereum, 8453=Base, 42161=Arbitrum) |
 | maxFeePerGas | string | EIP-1559 max fee per gas (type 2 only) |

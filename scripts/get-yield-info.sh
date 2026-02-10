@@ -70,11 +70,11 @@ echo "=== Yield Info: $YIELD_ID ==="
 echo ""
 
 echo "--- Basic Details ---"
-echo "$BODY" | jq -r '"Protocol:    \(.metadata.name // .metadata.protocol // "Unknown")
-Type:        \(.type // "Unknown")
+echo "$BODY" | jq -r '"Protocol:    \(.metadata.name // "Unknown")
+Type:        \(.mechanics.type // "Unknown")
 Network:     \(.network // "Unknown")
-Status:      \(.status // "Unknown")
-APY:         \(.apy // "N/A")"'
+Status:      enter=\(.status.enter // false), exit=\(.status.exit // false)
+APR:         \(.rewardRate.total // "N/A")"'
 
 echo ""
 echo "--- Token ---"
