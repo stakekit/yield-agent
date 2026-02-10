@@ -1,6 +1,6 @@
 {
   "name": "yield-agent",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "On-chain yield discovery, transaction building, and portfolio management via the Yield.xyz API across 80+ networks.",
   "author": "yield-xyz",
   "license": "MIT",

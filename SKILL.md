@@ -2,7 +2,7 @@
 name: yield-agent
 displayName: YieldAgent
 description: On-chain yield discovery, transaction building, and portfolio management via the Yield.xyz API. Use when the user wants to find yields, stake, lend, deposit into vaults, check balances, claim rewards, exit positions, compare APYs, or manage any on-chain yield across 80+ networks.
-version: 1.0.1
+version: 1.0.2
 author: yield-xyz
 metadata:
   clawhub:
@@ -128,7 +128,7 @@ Access the complete on-chain yield landscape through Yield.xyz's unified API. Di
 
 4. **Set `inputToken` to what the user wants to deposit** — but only if `inputToken` appears in the yield's `mechanics.arguments.enter` schema. The API handles the full flow (swaps, wrapping, routing) to get the user into the position.
 
-5. **Always submit the transaction hash after broadcasting.** For every transaction: sign, broadcast, then submit the hash via `PUT /v1/transactions/{txId}/submit-hash`. Balances will not appear on the balances endpoint until the hash is submitted.
+5. **ALWAYS submit the transaction hash after broadcasting — no exceptions.** For every transaction: sign, broadcast, then submit the hash via `PUT /v1/transactions/{txId}/submit-hash` with `{ "hash": "0x..." }`. Balances will not appear until the hash is submitted. This is the most common mistake — do not skip this step.
 
 6. **Execute transactions in exact order.** If an action has multiple transactions, they are ordered by `stepIndex`. Wait for `CONFIRMED` before proceeding to the next. Never skip or reorder.
 
@@ -178,8 +178,7 @@ The API handles decimal conversion internally.
 1. Discover yields: `find-yields.sh base USDC`
 2. Inspect the yield: `get-yield-info.sh <yieldId>` — read `mechanics.arguments.enter`
 3. Enter: `enter-position.sh <yieldId> <address> '{"amount":"100"}'`
-4. Wallet signs each transaction in `stepIndex` order
-5. Submit hash: `PUT /v1/transactions/{txId}/submit-hash`
+4. For each transaction: wallet signs → broadcast → **submit hash** → wait for CONFIRMED
 
 ### Manage a Position
 1. Check balances: `check-portfolio.sh <yieldId> <address>`
@@ -191,12 +190,19 @@ The API handles decimal conversion internally.
 
 ## Transaction Flow
 
-After any action (enter/exit/manage), the response contains `transactions[]`. For each:
+After any action (enter/exit/manage), the response contains `transactions[]`. For EACH transaction:
 
 1. Pass `unsignedTransaction` to wallet skill for signing and broadcasting
-2. Submit the hash: `PUT /v1/transactions/{txId}/submit-hash` with `{ "hash": "0x..." }`
+2. **Submit the hash** — `PUT /v1/transactions/{txId}/submit-hash` with `{ "hash": "0x..." }`
 3. Poll `GET /v1/transactions/{txId}` until `CONFIRMED` or `FAILED`
 4. Proceed to next transaction
+
+Every transaction must follow this flow. Example with 3 transactions:
+```
+TX1: sign → broadcast → submit-hash → poll until CONFIRMED
+TX2: sign → broadcast → submit-hash → poll until CONFIRMED
+TX3: sign → broadcast → submit-hash → poll until CONFIRMED
+```
 
 `unsignedTransaction` format varies by chain. See `{baseDir}/references/chain-formats.md` for details.
 
@@ -237,7 +243,7 @@ The API returns structured errors with `message`, `error`, and `statusCode`. Rea
 
 1. **NO Private Keys.** Never ask for or handle user private keys.
 2. **Wallet Handoff.** Pass unsigned transactions to the wallet skill. Never sign yourself.
-3. **Always submit hash.** Balances won't update until you submit the tx hash.
+3. **ALWAYS submit hash after every broadcast.** Balances won't update until you do. This is the most common mistake.
 4. **Sequential execution.** Process transactions in `stepIndex` order.
 5. **Read the schema.** Always fetch the yield and read `mechanics.arguments` before calling any action.
 
