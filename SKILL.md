@@ -1216,15 +1216,6 @@ Networks are categorized into families (from `NetworkDto.category`):
 - **Auth Header**: x-api-key (lowercase)
 - **unsignedTransaction**: `string | object | null` — encoding varies by chain family (see "Unsigned Transaction Formats by Chain").
 
-## Configuration Reference
-
-| Field | Env Override | Required | Description |
-|-------|-------------|----------|-------------|
-| apiKey | YIELDS_API_KEY | Yes | Production API key from dashboard.yield.xyz |
-| apiUrl | YIELDS_API_URL | No | Default: https://api.yield.xyz |
-| defaultNetwork | YIELD_NETWORK | No | Default network filter (e.g., base) |
-| slippage | YIELD_SLIPPAGE | No | Basis points (Default: 50 = 0.5%) |
-
 ## Troubleshooting
 
 Read the API error `message` — it tells you exactly what went wrong. Common issues:
