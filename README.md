@@ -1,12 +1,12 @@
 # YieldAgent by Yield.xyz
 
-AI-powered DeFi yield discovery, transaction building, and portfolio management across 2,600+ opportunities on 80+ networks.
+AI-powered on-chain yield discovery, transaction building, and portfolio management across 2,600+ opportunities on 80+ networks.
 
 ## Quick Start
 
 ```bash
 # 1. Unzip and enter the directory
-cd yield-finder
+cd yield-agent
 
 # 2. Make scripts executable
 chmod +x scripts/*.sh
@@ -14,15 +14,11 @@ chmod +x scripts/*.sh
 # 3. Find yields (API key is included - ready to go)
 ./scripts/find-yields.sh base USDC
 
-# 4. Build a transaction
-./scripts/enter-position.sh base-usdc-aave-v3-lending 0xYOUR_ADDRESS 100000000
+# 4. Enter a yield position
+./scripts/enter-position.sh base-usdc-aave-v3-lending 0xYOUR_ADDRESS '{"amount":"100"}'
 ```
 
 A free API key is included in `config.json`. No setup needed.
-
-## Version
-
-Check `config.json` for the current version. See `CHANGELOG.md` for release history.
 
 ## Requirements
 
@@ -34,9 +30,9 @@ Check `config.json` for the current version. See `CHANGELOG.md` for release hist
 | Script | Purpose | Example |
 |--------|---------|---------|
 | `find-yields.sh` | Discover yield opportunities | `./scripts/find-yields.sh base USDC` |
-| `enter-position.sh` | Enter a yield position | `./scripts/enter-position.sh <yield_id> <address> <amount>` |
-| `exit-position.sh` | Exit a yield position | `./scripts/exit-position.sh <yield_id> <address> <amount>` |
-| `manage-position.sh` | Claim rewards, restake, etc. | `./scripts/manage-position.sh <yield_id> <address> CLAIM_REWARDS` |
+| `enter-position.sh` | Enter a yield position | `./scripts/enter-position.sh <yield_id> <address> '{"amount":"100"}'` |
+| `exit-position.sh` | Exit a yield position | `./scripts/exit-position.sh <yield_id> <address> '{"amount":"50"}'` |
+| `manage-position.sh` | Claim rewards, restake, etc. | `./scripts/manage-position.sh <yield_id> <address> CLAIM_REWARDS <passthrough>` |
 | `check-portfolio.sh` | Check position balances | `./scripts/check-portfolio.sh <yield_id> <address>` |
 | `get-yield-info.sh` | Inspect yield metadata/limits | `./scripts/get-yield-info.sh <yield_id>` |
 | `list-validators.sh` | List validators for staking | `./scripts/list-validators.sh <yield_id>` |
@@ -44,8 +40,8 @@ Check `config.json` for the current version. See `CHANGELOG.md` for release hist
 ## Install to ClawHub
 
 ```bash
-mkdir -p ~/.clawhub/skills/yield-finder
-cp -r * ~/.clawhub/skills/yield-finder/
+mkdir -p ~/.clawhub/skills/yield-agent
+cp -r * ~/.clawhub/skills/yield-agent/
 ```
 
 Scripts auto-detect `~/.openclaw/`, `~/.clawhub/`, or `~/.clawdbot/` paths.

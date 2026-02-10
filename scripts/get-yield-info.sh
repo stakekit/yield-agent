@@ -18,14 +18,14 @@
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 CONFIG_DIR=""
-for dir in "${SCRIPT_DIR}/.." "${HOME}/.openclaw/skills/yield-finder" "${HOME}/.clawhub/skills/yield-finder" "${HOME}/.clawdbot/skills/yield-finder"; do
+for dir in "${SCRIPT_DIR}/.." "${HOME}/.openclaw/skills/yield-agent" "${HOME}/.clawhub/skills/yield-agent" "${HOME}/.clawdbot/skills/yield-agent"; do
   if [ -f "${dir}/config.json" ]; then
     CONFIG_DIR="$dir"
     break
   fi
 done
 if [ -z "$CONFIG_DIR" ]; then
-  echo "Error: config.json not found. Run from the yield-finder directory or install to ~/.clawhub/skills/yield-finder/"
+  echo "Error: config.json not found. Run from the yield-agent directory or install to ~/.clawhub/skills/yield-agent/"
   exit 1
 fi
 
@@ -49,7 +49,7 @@ if [ -z "$YIELD_ID" ]; then
 fi
 
 RESPONSE=$(curl -s -w "\n%{http_code}" -X GET \
-  "${API_URL}/yields/${YIELD_ID}" \
+  "${API_URL}/v1/yields/${YIELD_ID}" \
   -H "x-api-key: ${API_KEY}" \
   -H "Content-Type: application/json")
 
@@ -120,21 +120,14 @@ if [ ! -z "$ENTER_ARGS" ] && [ "$ENTER_ARGS" != "null" ]; then
   TOKEN_DECIMALS=$(echo "$BODY" | jq -r '.token.decimals // 0')
 
   if [ "$MIN_AMOUNT" != "none" ] && [ "$MIN_AMOUNT" != "null" ]; then
-    if command -v python3 &> /dev/null; then
-      HUMAN_MIN=$(python3 -c "print(f'{int(\"$MIN_AMOUNT\") / (10 ** $TOKEN_DECIMALS):.6f}')" 2>/dev/null)
-      echo ""
-      echo "  Minimum deposit: $HUMAN_MIN $(echo "$BODY" | jq -r '.token.symbol') ($MIN_AMOUNT raw)"
-    fi
+    echo ""
+    echo "  Minimum deposit: $MIN_AMOUNT"
   fi
   if [ "$MAX_AMOUNT" != "none" ] && [ "$MAX_AMOUNT" != "null" ]; then
-    if command -v python3 &> /dev/null; then
-      HUMAN_MAX=$(python3 -c "print(f'{int(\"$MAX_AMOUNT\") / (10 ** $TOKEN_DECIMALS):.6f}')" 2>/dev/null)
-      echo "  Maximum deposit: $HUMAN_MAX $(echo "$BODY" | jq -r '.token.symbol') ($MAX_AMOUNT raw)"
-    fi
+    echo "  Maximum deposit: $MAX_AMOUNT"
   fi
 else
-  echo "Arguments:   amount (raw integer string) - standard schema"
-  echo "             Use --dry-run in enter-position.sh to validate before building"
+  echo "Arguments:   amount (human-readable string) - standard schema"
 fi
 
 EXIT_ARGS=$(echo "$BODY" | jq '.args.exit // .mechanics.arguments.exit // empty' 2>/dev/null)
@@ -159,8 +152,7 @@ fi
 
 echo ""
 echo "--- Quick Commands ---"
-echo "  Dry run:     ./enter-position.sh $YIELD_ID <address> <amount> --dry-run"
-echo "  Build tx:    ./enter-position.sh $YIELD_ID <address> <amount>"
+echo "  Enter:       ./enter-position.sh $YIELD_ID <address> '{\"amount\":\"100\"}'"
 if [ "$REQUIRES_VALIDATOR" = "true" ]; then
   echo "  Validators:  ./list-validators.sh $YIELD_ID"
 fi

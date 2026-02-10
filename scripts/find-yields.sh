@@ -10,14 +10,14 @@
 # Auto-detect config path: local (extracted ZIP) or installed (OpenClaw/ClawHub/Clawdbot)
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 CONFIG_DIR=""
-for dir in "${SCRIPT_DIR}/.." "${HOME}/.openclaw/skills/yield-finder" "${HOME}/.clawhub/skills/yield-finder" "${HOME}/.clawdbot/skills/yield-finder"; do
+for dir in "${SCRIPT_DIR}/.." "${HOME}/.openclaw/skills/yield-agent" "${HOME}/.clawhub/skills/yield-agent" "${HOME}/.clawdbot/skills/yield-agent"; do
   if [ -f "${dir}/config.json" ]; then
     CONFIG_DIR="$dir"
     break
   fi
 done
 if [ -z "$CONFIG_DIR" ]; then
-  echo "Error: config.json not found. Run from the yield-finder directory or install to ~/.clawhub/skills/yield-finder/"
+  echo "Error: config.json not found. Run from the yield-agent directory or install to ~/.clawhub/skills/yield-agent/"
   exit 1
 fi
 
@@ -61,8 +61,8 @@ if [ ! -z "$TOKEN" ]; then
 fi
 
 # Call API
-# Returns: { items: YieldOpportunity[], total: number }
-RESPONSE=$(curl -s -X GET "${API_URL}/yields?${QUERY}" \
+# Returns: { items: YieldDto[], total: number }
+RESPONSE=$(curl -s -X GET "${API_URL}/v1/yields?${QUERY}" \
   -H "x-api-key: ${API_KEY}" \
   -H "Content-Type: application/json")
 

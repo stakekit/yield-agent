@@ -2,7 +2,7 @@
 
 ## OpenClaw Agent Conversations
 
-These are real conversation flows showing how an agent uses the yield-finder skill on OpenClaw. Each example shows the user prompt, what the agent does behind the scenes, and how it responds. All yield IDs are real and verified against the live Yield.xyz API on Base network.
+These are real conversation flows showing how an agent uses the yield-agent skill on OpenClaw. Each example shows the user prompt, what the agent does behind the scenes, and how it responds. All yield IDs are real and verified against the live Yield.xyz API on Base network.
 
 ---
 
@@ -10,7 +10,7 @@ These are real conversation flows showing how an agent uses the yield-finder ski
 
 **User:** "What yield opportunities are available for USDC on Base?"
 
-**Agent thinks:** I'll search for USDC yields on Base using the yield-finder skill.
+**Agent thinks:** I'll search for USDC yields on Base using the yield-agent skill.
 
 **Agent runs:**
 ```bash
@@ -39,11 +39,11 @@ These are real conversation flows showing how an agent uses the yield-finder ski
 
 **User:** "Deposit 500 USDC into the Morpho flagship vault. My wallet is 0x742d35Cc6634C0532925a3b844Bc454e4438f44e"
 
-**Agent thinks:** 500 USDC = 500,000,000 (6 decimals). I'll build the transaction for the Morpho flagship vault.
+**Agent thinks:** I'll enter 500 USDC into the Morpho flagship vault. First let me check the yield's argument schema.
 
 **Agent runs:**
 ```bash
-./scripts/enter-position.sh base-usdc-cousdc-0x1d3b1cd0a0f242d598834b3f2d126dc6bd774657-4626-vault 0x742d35Cc6634C0532925a3b844Bc454e4438f44e 500000000
+./scripts/enter-position.sh base-usdc-cousdc-0x1d3b1cd0a0f242d598834b3f2d126dc6bd774657-4626-vault 0x742d35Cc6634C0532925a3b844Bc454e4438f44e '{"amount":"500"}'
 ```
 
 **Agent responds:**
@@ -102,12 +102,11 @@ These are real conversation flows showing how an agent uses the yield-finder ski
 
 **Transaction signing flow:**
 ```bash
-# 1. Parse each unsignedTransaction JSON string
-# 2. Increase gasLimit by 30% for safety margin
-# 3. Sign with wallet (Bankr, Privy, or other)
-# 4. Submit: POST /v1/transactions/{txId}/submit { "signedTransaction": "0x..." }
-# 5. Poll: GET /v1/transactions/{txId} until status = "CONFIRMED"
-# 6. Repeat for next transaction in sequence (increment nonce)
+# For each transaction in stepIndex order:
+# 1. Pass unsignedTransaction to wallet skill for signing + broadcasting
+# 2. Submit hash: PUT /v1/transactions/{txId}/submit-hash { "hash": "0x..." }
+# 3. Poll: GET /v1/transactions/{txId} until status = "CONFIRMED"
+# 4. Proceed to next transaction
 ```
 
 ---
@@ -211,11 +210,11 @@ These are real conversation flows showing how an agent uses the yield-finder ski
 
 **User:** "I want to withdraw 200 USDC from my Morpho vault"
 
-**Agent thinks:** 200 USDC = 200,000,000 raw. I'll build the exit transaction.
+**Agent thinks:** I'll exit 200 USDC from the Morpho vault.
 
 **Agent runs:**
 ```bash
-./scripts/exit-position.sh base-usdc-cousdc-0x1d3b1cd0a0f242d598834b3f2d126dc6bd774657-4626-vault 0x742d35Cc6634C0532925a3b844Bc454e4438f44e 200000000
+./scripts/exit-position.sh base-usdc-cousdc-0x1d3b1cd0a0f242d598834b3f2d126dc6bd774657-4626-vault 0x742d35Cc6634C0532925a3b844Bc454e4438f44e '{"amount":"200"}'
 ```
 
 **Agent responds:**
@@ -307,11 +306,11 @@ These are real conversation flows showing how an agent uses the yield-finder ski
 **Agent runs:**
 ```bash
 # Exit Compound
-./scripts/exit-position.sh base-usdc-compound-v3-lending 0x742d35Cc6634C0532925a3b844Bc454e4438f44e 200000000
+./scripts/exit-position.sh base-usdc-compound-v3-lending 0x742d35Cc6634C0532925a3b844Bc454e4438f44e '{"amount":"200"}'
 # Sign + submit + confirm
 
 # Enter Morpho Flagship
-./scripts/enter-position.sh base-usdc-cousdc-0x1d3b1cd0a0f242d598834b3f2d126dc6bd774657-4626-vault 0x742d35Cc6634C0532925a3b844Bc454e4438f44e 200000000
+./scripts/enter-position.sh base-usdc-cousdc-0x1d3b1cd0a0f242d598834b3f2d126dc6bd774657-4626-vault 0x742d35Cc6634C0532925a3b844Bc454e4438f44e '{"amount":"200"}'
 # Sign + submit + confirm
 ```
 
@@ -338,9 +337,11 @@ These are real conversation flows showing how an agent uses the yield-finder ski
 # Step 1: Find the staking yield
 ./scripts/find-yields.sh cosmos ATOM
 
-# Step 2: Fetch available validators for this yield
-curl -s -X GET "https://api.stakek.it/v1/yields/cosmos-atom-native-staking/validators?limit=10" \
-  -H "x-api-key: $(jq -r '.apiKey' config.json)" | jq '.items[] | {name, address, commission, stakedBalance, status}'
+# Step 2: Inspect the yield schema to see if validators are needed
+./scripts/get-yield-info.sh cosmos-atom-native-staking
+
+# Step 3: Fetch available validators
+./scripts/list-validators.sh cosmos-atom-native-staking
 ```
 
 **Agent responds:**
@@ -361,7 +362,7 @@ curl -s -X GET "https://api.stakek.it/v1/yields/cosmos-atom-native-staking/valid
 
 **Agent runs:**
 ```bash
-./scripts/enter-position.sh cosmos-atom-native-staking 0x742d... 100000000 cosmos1everstakevalidatoraddress
+./scripts/enter-position.sh cosmos-atom-native-staking 0x742d... '{"amount":"100","validatorAddress":"cosmos1everstakevalidatoraddress"}'
 ```
 
 **Agent responds:**
@@ -395,16 +396,15 @@ curl -s -X GET "https://api.stakek.it/v1/yields/cosmos-atom-native-staking/valid
 
 **Agent runs:**
 ```bash
-# Step 1: Swap via Bankr
-scripts/bankr.sh "Swap 0.5 ETH to USDC on Base"
+# Step 1: Swap ETH to USDC via wallet skill (Bankr, etc.)
 # Result: ~1,300 USDC received
 
 # Step 2: Find best yield
 ./scripts/find-yields.sh base USDC
 
 # Step 3: Enter Morpho Flagship vault
-./scripts/enter-position.sh base-usdc-cousdc-0x1d3b1cd0a0f242d598834b3f2d126dc6bd774657-4626-vault 0xBankrWallet 1300000000
-# Sign via Bankr
+./scripts/enter-position.sh base-usdc-cousdc-0x1d3b1cd0a0f242d598834b3f2d126dc6bd774657-4626-vault 0xWallet '{"amount":"1300"}'
+# Sign via wallet skill
 ```
 
 **Agent responds:**
@@ -527,14 +527,15 @@ These are the top trusted yield opportunities on Base, verified against the live
 
 ### Amount Formatting
 
-Amounts must be raw integer strings (not decimals):
+Amounts are human-readable strings — use the value as the user would say it:
 
-| Token | Decimals | 100 tokens | 0.5 tokens |
-|-------|----------|------------|------------|
-| USDC | 6 | `100000000` | `500000` |
-| ETH | 18 | `100000000000000000000` | `500000000000000000` |
-| ATOM | 6 | `100000000` | `500000` |
-| DAI | 18 | `100000000000000000000` | `500000000000000000` |
+```
+"100"   →  100 tokens
+"0.5"   →  0.5 tokens
+"1"     →  1 token
+```
+
+The API handles decimal conversion internally. No need to know token decimals.
 
 ### Environment Variable Overrides
 
@@ -542,7 +543,7 @@ Override config.json values without editing the file:
 
 ```bash
 export YIELDS_API_KEY="your-custom-key"
-export YIELDS_API_URL="https://api.stakek.it/v1"
+export YIELDS_API_URL="https://api.stakek.it"
 export YIELD_NETWORK="ethereum"
 
 ./scripts/find-yields.sh    # Uses env vars instead of config.json
@@ -557,7 +558,7 @@ export YIELD_NETWORK="ethereum"
 Run this immediately after unzipping to verify everything works:
 
 ```bash
-cd yield-finder
+cd yield-agent
 chmod +x scripts/*.sh
 
 # Test 1: Discovery (should return JSON with yields)
@@ -570,15 +571,15 @@ echo "=== Test 2: Balance Check ==="
 
 # Test 3: Build transaction (should return Action with transactions)
 echo "=== Test 3: Build Transaction ==="
-./scripts/enter-position.sh base-usdc-aave-v3-lending 0x0000000000000000000000000000000000000001 1000000
+./scripts/enter-position.sh base-usdc-aave-v3-lending 0x0000000000000000000000000000000000000001 '{"amount":"1"}'
 
 # Test 4: Exit position (should return Action with transactions)
 echo "=== Test 4: Exit Position ==="
-./scripts/exit-position.sh base-usdc-aave-v3-lending 0x0000000000000000000000000000000000000001 500000
+./scripts/exit-position.sh base-usdc-aave-v3-lending 0x0000000000000000000000000000000000000001 '{"amount":"0.5"}'
 
 # Test 5: Input validation (should show error)
 echo "=== Test 5: Input Validation ==="
-./scripts/enter-position.sh base-usdc-aave-v3-lending 0x0000000000000000000000000000000000000001 "not-a-number"
+./scripts/enter-position.sh base-usdc-aave-v3-lending 0x0000000000000000000000000000000000000001 "not-json"
 ```
 
 ### Validation Checklist
@@ -588,8 +589,8 @@ echo "=== Test 5: Input Validation ==="
 | API works | `./scripts/find-yields.sh base` | JSON with `items` array |
 | Token filter | `./scripts/find-yields.sh base USDC` | Only USDC yields |
 | Balance check | `./scripts/check-portfolio.sh <id> <addr>` | JSON with `balances` |
-| Build TX | `./scripts/enter-position.sh <id> <addr> 1000000` | Action with `transactions` |
-| Bad amount | `./scripts/enter-position.sh <id> <addr> "abc"` | Error: raw integer |
+| Enter | `./scripts/enter-position.sh <id> <addr> '{"amount":"100"}'` | Action with `transactions` |
+| Bad JSON | `./scripts/enter-position.sh <id> <addr> "not-json"` | Error: must be valid JSON |
 | No args | `./scripts/find-yields.sh` | Usage message |
 | Bad API key | `YIELDS_API_KEY=bad ./scripts/find-yields.sh base` | 401 error |
 
@@ -601,34 +602,26 @@ YIELDS_API_KEY="invalid" ./scripts/find-yields.sh base USDC
 # Expected: 401 Unauthorized
 
 # Invalid yield ID
-./scripts/enter-position.sh "nonexistent-yield" "0x..." "1000000"
+./scripts/enter-position.sh "nonexistent-yield" "0x..." '{"amount":"100"}'
 # Expected: 404 or error message
 
-# Malformed amount (caught locally before API call)
-./scripts/enter-position.sh "base-usdc-aave-v3-lending" "0x..." "one hundred"
-# Expected: "Error: Amount must be a raw integer string"
+# Malformed JSON
+./scripts/enter-position.sh "base-usdc-aave-v3-lending" "0x..." "not-json"
+# Expected: "Error: arguments_json must be valid JSON"
 ```
 
 ---
 
 ## Transaction Signing Flow
 
-After building a transaction, the agent must:
+After building a transaction, for each transaction in `stepIndex` order:
 
-1. **Parse** each `unsignedTransaction` (it's a JSON string inside the Action response)
-2. **Increase gas** limit by 30% for safety margin
-3. **Sign** with wallet skill (Bankr, Privy, or other)
-4. **Submit** signed transaction:
-   ```
-   POST /v1/transactions/{txId}/submit
-   { "signedTransaction": "0x..." }
-   ```
-5. **Poll** until confirmed:
-   ```
-   GET /v1/transactions/{txId}
-   # Wait for status: "CONFIRMED"
-   ```
-6. **Repeat** for next transaction in the Action (increment nonce)
+1. **Pass** `unsignedTransaction` to the wallet skill for signing and broadcasting (format varies by chain — see SKILL.md)
+2. **Submit hash**: `PUT /v1/transactions/{txId}/submit-hash` with `{ "hash": "0x..." }`
+3. **Poll** `GET /v1/transactions/{txId}` until status is `CONFIRMED` or `FAILED`
+4. **Proceed** to the next transaction
+
+Signing, gas management, and nonce handling are the wallet skill's responsibility.
 
 ---
 
@@ -637,10 +630,7 @@ After building a transaction, the agent must:
 - [ ] API key in config.json (included by default)
 - [ ] Scripts executable (`chmod +x scripts/*.sh`)
 - [ ] `jq` and `curl` installed
-- [ ] Wallet skill configured (Bankr, Privy, or other)
-- [ ] Safety checks understood (see safety.md)
-- [ ] Amounts formatted as raw integer strings
-- [ ] Gas limit increased 30% before signing
-- [ ] Sequential transactions use incremented nonces
-- [ ] Transaction status polled until CONFIRMED
-- [ ] unsignedTransaction parsed as JSON string before signing
+- [ ] Wallet skill configured for signing
+- [ ] Always fetch yield schema before calling actions
+- [ ] Amounts are human-readable strings
+- [ ] Transactions executed in `stepIndex` order, waiting for CONFIRMED between each

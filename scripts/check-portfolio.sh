@@ -16,14 +16,14 @@
 # Auto-detect config path: local (extracted ZIP) or installed (OpenClaw/ClawHub/Clawdbot)
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 CONFIG_DIR=""
-for dir in "${SCRIPT_DIR}/.." "${HOME}/.openclaw/skills/yield-finder" "${HOME}/.clawhub/skills/yield-finder" "${HOME}/.clawdbot/skills/yield-finder"; do
+for dir in "${SCRIPT_DIR}/.." "${HOME}/.openclaw/skills/yield-agent" "${HOME}/.clawhub/skills/yield-agent" "${HOME}/.clawdbot/skills/yield-agent"; do
   if [ -f "${dir}/config.json" ]; then
     CONFIG_DIR="$dir"
     break
   fi
 done
 if [ -z "$CONFIG_DIR" ]; then
-  echo "Error: config.json not found. Run from the yield-finder directory or install to ~/.clawhub/skills/yield-finder/"
+  echo "Error: config.json not found. Run from the yield-agent directory or install to ~/.clawhub/skills/yield-agent/"
   exit 1
 fi
 
@@ -50,10 +50,11 @@ PAYLOAD=$(jq -n --arg addr "$ADDRESS" '{address: $addr}')
 
 # Call API
 # Returns: YieldBalancesDto { yieldId, balances: BalanceDto[] }
-# Each BalanceDto: { address, type, amount, amountRaw, amountUsd, token, pendingActions, validator, isEarning }
-# pendingActions are objects: { intent, type, passthrough, arguments? }
-# Use passthrough values with manage-position.sh
-RESPONSE=$(curl -s -X POST "${API_URL}/yields/${YIELD_ID}/balances" \
+# Each BalanceDto has: address, type, amount, amountRaw, amountUsd, token, pendingActions, validator, isEarning
+# Each PendingActionDto has: intent, type, passthrough, arguments?
+# Use type + passthrough with manage-position.sh
+# See references/openapi.yaml for full DTO schemas
+RESPONSE=$(curl -s -X POST "${API_URL}/v1/yields/${YIELD_ID}/balances" \
   -H "x-api-key: ${API_KEY}" \
   -H "Content-Type: application/json" \
   -d "$PAYLOAD")

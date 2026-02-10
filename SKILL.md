@@ -1,8 +1,8 @@
 ---
-name: yield-finder
+name: yield-agent
 displayName: YieldAgent
-description: AI-powered DeFi yield discovery, transaction building, and portfolio management across 80+ networks
-version: 1.2.0
+description: AI-powered on-chain yield discovery, transaction building, and portfolio management across 80+ networks
+version: 1.0.0
 author: yield-xyz
 metadata:
   clawhub:
@@ -12,7 +12,7 @@ metadata:
       bins: ["curl", "jq"]
     tools:
       - name: find-yields
-        description: Discover DeFi yield opportunities by network and token
+        description: Discover yield opportunities by network and token
         entry: scripts/find-yields.sh
         args:
           - name: network
@@ -28,7 +28,7 @@ metadata:
             description: Pagination offset (default 0)
             required: false
       - name: enter-position
-        description: Construct an unsigned transaction to enter a yield position
+        description: Enter a yield position. Fetch the yield first (GET /v1/yields/{yieldId}) to discover required arguments from mechanics.arguments.enter
         entry: scripts/enter-position.sh
         args:
           - name: yieldId
@@ -37,14 +37,11 @@ metadata:
           - name: address
             description: The user wallet address
             required: true
-          - name: amount
-            description: The amount to deposit as raw integer string with proper decimals (e.g., '100000000' for 100 USDC)
+          - name: arguments_json
+            description: JSON string of arguments from the yield's mechanics.arguments.enter schema. Always includes "amount". Other fields (validatorAddress, inputToken, etc.) depend on the yield.
             required: true
-          - name: validatorAddress
-            description: Validator address for staking yields that require validator selection. Get validators from GET /v1/yields/{yieldId}/validators
-            required: false
       - name: exit-position
-        description: Generate unsigned transactions to exit/withdraw from a yield position
+        description: Exit a yield position. Fetch the yield first (GET /v1/yields/{yieldId}) to discover required arguments from mechanics.arguments.exit
         entry: scripts/exit-position.sh
         args:
           - name: yieldId
@@ -53,11 +50,11 @@ metadata:
           - name: address
             description: The user wallet address
             required: true
-          - name: amount
-            description: The amount to withdraw as raw integer string with proper decimals
+          - name: arguments_json
+            description: JSON string of arguments from the yield's mechanics.arguments.exit schema. Always includes "amount". Other fields depend on the yield.
             required: true
       - name: manage-position
-        description: Perform management actions like claiming rewards, restaking, or delegation changes
+        description: Manage a yield position (claim, restake, redelegate, etc.). Discover available actions from pendingActions[] in the balances response.
         entry: scripts/manage-position.sh
         args:
           - name: yieldId
@@ -67,13 +64,13 @@ metadata:
             description: The user wallet address
             required: true
           - name: action
-            description: The pending action type from pendingActions[].type in the balances response (e.g., CLAIM_REWARDS, RESTAKE_REWARDS, WITHDRAW). The API is self-documenting — check balances first.
+            description: The action type from pendingActions[].type in the balances response
             required: true
           - name: passthrough
-            description: Passthrough string from the pendingActions array in the balances response. Required for most actions.
-            required: false
+            description: The passthrough string from pendingActions[].passthrough in the balances response
+            required: true
           - name: arguments_json
-            description: JSON string of additional arguments if required by the action schema
+            description: JSON string of arguments from pendingActions[].arguments schema, if the action requires additional input
             required: false
       - name: check-portfolio
         description: Check yield balances for a specific yield position
@@ -106,9 +103,38 @@ metadata:
 
 # YieldAgent by Yield.xyz
 
-Access the complete DeFi yield landscape through Yield.xyz's unified API. Discover 2600+ yields, build transactions, and manage portfolio positions across 80+ networks.
+Access the complete on-chain yield landscape through Yield.xyz's unified API. Discover 2600+ yields across staking, lending, vaults, restaking, and liquidity pools. Build transactions and manage positions across 80+ networks.
 
 > **For exact types, schemas, enums, and request/response shapes, consult `references/openapi.yaml`.** It is the source of truth for the API. This SKILL.md describes how to use the tools and flows — the OpenAPI spec defines the precise contract.
+
+## Key Rules
+
+> **The API is self-documenting.** Every yield describes its own requirements through the `YieldDto`. Before taking any action, always fetch the yield and inspect it. The `mechanics` field tells you everything: what arguments are needed (`mechanics.arguments.enter`, `.exit`), entry limits (`mechanics.entryLimits`), and what tokens are accepted (`inputTokens[]`). Never assume — always check the yield first.
+
+1. **Always fetch the yield before calling an action.** Call `GET /v1/yields/{yieldId}` and read `mechanics.arguments.enter` (or `.exit`) to discover the exact fields required. Each yield is different — the schema is the contract. Do not guess or hardcode arguments.
+
+   Each field in the schema (`ArgumentFieldDto`) tells you:
+   - `name`: the field name (e.g., `amount`, `validatorAddress`, `inputToken`)
+   - `type`: the value type (`string`, `number`, `address`, `enum`, `boolean`)
+   - `required`: whether it must be provided
+   - `options`: static choices for enum fields (e.g., `["individual", "batched"]`)
+   - `optionsRef`: a dynamic API endpoint to fetch choices (e.g., `/api/v1/validators?integrationId=...`) — if present, call it to get the valid options (validators, providers, etc.)
+   - `minimum` / `maximum`: value constraints
+   - `isArray`: whether the field expects an array
+
+   If a field has `optionsRef`, you must call that endpoint to get the valid values. This is how validators, providers, and other dynamic options are discovered.
+
+2. **For manage actions, always fetch balances first.** Call `POST /v1/yields/{yieldId}/balances` and read `pendingActions[]` on each balance. Each pending action tells you its `type`, `passthrough`, and optional `arguments` schema. Only call manage with values from this response.
+
+3. **Amounts are human-readable.** `"100"` means 100 USDC. `"1"` means 1 ETH. `"0.5"` means 0.5 SOL. Do NOT convert to wei or raw integers — the API handles decimals internally.
+
+4. **Set `inputToken` to what the user wants to deposit** — but only if `inputToken` appears in the yield's `mechanics.arguments.enter` schema. The API handles the full flow (swaps, wrapping, routing) to get the user into the position.
+
+5. **Always submit the transaction hash after broadcasting.** For every transaction: sign, broadcast, then submit the hash via `PUT /v1/transactions/{txId}/submit-hash`. Balances will not appear on the balances endpoint until the hash is submitted.
+
+6. **Execute transactions in exact order.** If an action has multiple transactions, they are ordered by `stepIndex`. Wait for `CONFIRMED` before proceeding to the next. Never skip or reorder.
+
+7. **Consult `references/openapi.yaml` for types.** All enums, DTOs, and schemas are defined there. Do not hardcode values.
 
 > **CRITICAL: `unsignedTransaction` format varies by chain!**
 > The `unsignedTransaction` field is typed `string | object | null`. Its encoding depends on the chain family:
@@ -132,44 +158,33 @@ Access the complete DeFi yield landscape through Yield.xyz's unified API. Discov
 ## I Just Want to Deposit USDC (10-Line Quick Start)
 
 ```bash
-cd yield-finder && chmod +x scripts/*.sh
+cd yield-agent && chmod +x scripts/*.sh
 
 # 1. Find the best yields
 ./scripts/find-yields.sh base USDC
 
-# 2. Build the transaction (100 USDC = 100000000 raw, 6 decimals)
-./scripts/enter-position.sh base-usdc-aave-v3-lending 0xYOUR_WALLET 100000000
+# 2. Enter a position (amounts are human-readable — "100" means 100 USDC)
+./scripts/enter-position.sh base-usdc-aave-v3-lending 0xYOUR_WALLET '{"amount":"100"}'
 
 # 3. The response contains unsigned transaction(s) to pass to your wallet skill for signing
 ```
 
-## Amount Conversion Reference
+## Amounts
 
-Amounts must be **raw integer strings**. The LLM computes: `raw_amount = human_amount * 10^decimals`.
+Amounts are **human-readable strings**. Use the amount as the user would say it:
 
-**Formula:** `raw_amount = human_amount * 10^decimals`
+- `"1"` for 1 ETH
+- `"100"` for 100 USDC
+- `"0.5"` for 0.5 SOL
 
-| Token | Decimals | Human Amount | Raw Amount (use this) |
-|-------|----------|--------------|----------------------|
-| USDC  | 6        | 0.01         | `10000`              |
-| USDC  | 6        | 1.00         | `1000000`            |
-| USDC  | 6        | 100.00       | `100000000`          |
-| USDC  | 6        | 1000.00      | `1000000000`         |
-| ETH   | 18       | 0.001        | `1000000000000000`   |
-| ETH   | 18       | 0.01         | `10000000000000000`  |
-| ETH   | 18       | 0.1          | `100000000000000000` |
-| ETH   | 18       | 1.00         | `1000000000000000000`|
-| WBTC  | 8        | 0.001        | `100000`             |
-| WBTC  | 8        | 1.00         | `100000000`          |
-| DAI   | 18       | 100.00       | `100000000000000000000` |
-| SOL   | 9        | 1.00         | `1000000000`         |
+Do not convert to wei, raw integers, or smallest units. The API handles decimal conversion internally.
 
 ## Setup
 
 #### Option A: OpenClaw (Recommended)
 Tell your OpenClaw agent:
 ```
-install the yield-finder skill from https://github.com/yield-xyz/openclaw-skills
+install the yield-agent skill from https://github.com/yield-xyz/openclaw-skills
 ```
 
 #### Option B: ClawHub / Manual
@@ -177,8 +192,8 @@ install the yield-finder skill from https://github.com/yield-xyz/openclaw-skills
 2. Configure (scripts auto-detect `~/.openclaw/`, `~/.clawhub/`, or `~/.clawdbot/`):
 
 ```bash
-mkdir -p ~/.clawhub/skills/yield-finder
-cp -r yield-finder/* ~/.clawhub/skills/yield-finder/
+mkdir -p ~/.clawhub/skills/yield-agent
+cp -r yield-agent/* ~/.clawhub/skills/yield-agent/
 # A free API key is already included in config.json
 # For your own key later, visit dashboard.yield.xyz
 ```
@@ -194,9 +209,9 @@ cp -r yield-finder/* ~/.clawhub/skills/yield-finder/
 
 ### Write Operations (REQUIRES GAS)
 
-- `enter-position.sh` (Enter): Generates unsigned call data for deposits. Supports `--dry-run` validation.
-- `exit-position.sh` (Exit): Generates unsigned call data for withdrawals.
-- `manage-position.sh` (Manage): Generates unsigned call data for claiming/restaking. See passthrough workflow below.
+- `enter-position.sh` (Enter): Generates unsigned transactions for entering yield positions.
+- `exit-position.sh` (Exit): Generates unsigned transactions for exiting yield positions.
+- `manage-position.sh` (Manage): Generates unsigned transactions for claiming, restaking, redelegating, etc. Requires passthrough from balances.
 
 > All write operations produce unsigned transactions. Signing is always handled by a separate wallet skill.
 
@@ -204,7 +219,7 @@ cp -r yield-finder/* ~/.clawhub/skills/yield-finder/
 
 ### 1. Discover Yields
 
-Find staking and DeFi opportunities across networks.
+Find yield opportunities across networks.
 
 **Examples:**
 - "Find USDC yields on Base"
@@ -303,8 +318,8 @@ curl -X POST "$API_URL/actions/enter" \
     "yieldId": "base-usdc-aave-v3-lending",
     "address": "0xUserWallet",
     "arguments": {
-      "amount": "100000000",
-      "validatorAddress": "0x..."
+      "amount": "100",
+      "inputToken": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
     }
   }'
 ```
@@ -317,13 +332,16 @@ Each yield declares its required arguments under `mechanics.arguments.enter`, `.
 # Get the yield schema — shows required arguments, entry limits, validator requirements
 ./scripts/get-yield-info.sh base-usdc-aave-v3-lending
 # Look at: mechanics.arguments.enter.fields[], mechanics.requiresValidatorSelection, mechanics.entryLimits
+# Look at: inputTokens[] to see which tokens the yield accepts
 ```
 
 The schema defines field names, types, whether required, default values, and dynamic references (e.g., `optionsRef` for validator lists). Always read the yield details before calling an action.
 
+**`inputToken`**: If the yield's `mechanics.arguments.enter` schema includes an `inputToken` field, set it to the token address the user wants to deposit. The API handles all intermediate steps (swaps, wrapping, bridging) to get the user into the position. If the field is not in the schema, the yield only accepts its canonical token — check `inputTokens[]` on the yield to see what's accepted.
+
 See `references/openapi.yaml` → `ActionArgumentsDto` for the full type definition.
 
-**Response (Action object):**
+**Response (ActionDto):**
 ```json
 {
   "id": "a2090424-4b43-4767-a61e-d7bbb395ab38",
@@ -331,8 +349,8 @@ See `references/openapi.yaml` → `ActionArgumentsDto` for the full type definit
   "type": "STAKE",
   "yieldId": "base-usdc-aave-v3-lending",
   "address": "0xUserWallet",
-  "amount": "100000000",
-  "amountRaw": "100000000000000000000000000",
+  "amount": "100",
+  "amountRaw": "100000000",
   "amountUsd": "100.00",
   "status": "CREATED",
   "executionPattern": "synchronous",
@@ -376,13 +394,12 @@ See `references/openapi.yaml` → `ActionArgumentsDto` for the full type definit
       "structuredTransaction": null
     }
   ],
-  "rawArguments": { "amount": "100000000" },
+  "rawArguments": { "amount": "100" },
   "createdAt": "2025-01-15T10:30:00Z",
   "completedAt": null
 }
 ```
 
-> Note: For EVM chains, `unsignedTransaction` is a JSON string — parse it with `JSON.parse()` / `jq -r` before signing. For other chains, see "Unsigned Transaction Formats by Chain" below.
 
 ### 3. Exit Positions
 
@@ -401,7 +418,7 @@ curl -X POST "$API_URL/actions/exit" \
   -d '{
     "yieldId": "base-usdc-aave-v3-lending",
     "address": "0xUserWallet",
-    "arguments": { "amount": "50000000" }
+    "arguments": { "amount": "50" }
   }'
 ```
 
@@ -428,17 +445,16 @@ curl -X POST "$API_URL/actions/manage" \
   }'
 ```
 
-**Passthrough Workflow (step by step):**
+**Workflow:**
 1. Check your position: `./scripts/check-portfolio.sh <yield_id> <address>`
-2. Look for `pendingActions[]` in the output - each has `{ type, passthrough }`
-3. Copy the `passthrough` string and use it: `./scripts/manage-position.sh <yield_id> <address> CLAIM_REWARDS "eyJhbGci..."`
-4. The response contains `unsignedTransaction`(s) to sign
-
-To discover available actions for a position, check `pendingActions[]` in the balances response. Each pending action includes its `type`, `passthrough`, and optional `arguments` schema.
+2. Look for `pendingActions[]` in the output — each has `{ type, passthrough, arguments? }`
+3. Use the `type` and `passthrough` from the pending action: `./scripts/manage-position.sh <yield_id> <address> CLAIM_REWARDS "eyJhbGci..."`
+4. If the pending action has an `arguments` schema, pass matching JSON as the 5th arg
+5. The response contains unsigned transactions to sign
 
 ### 4b. Yield Info & Validator Discovery
 
-Before entering a staking yield, check what arguments are required and whether validators are needed.
+Before entering any yield, fetch its metadata to discover required arguments, entry limits, and whether validators are needed.
 
 **Check yield requirements:**
 ```bash
@@ -454,7 +470,7 @@ Before entering a staking yield, check what arguments are required and whether v
 
 Then use the validator address when building the transaction:
 ```bash
-./scripts/enter-position.sh cosmos-atom-cosmoshub-staking 0xWallet 1000000 0xValidatorAddr
+./scripts/enter-position.sh cosmos-atom-cosmoshub-staking 0xWallet '{"amount":"1000","validatorAddress":"cosmosvaloper1..."}'
 ```
 
 ### 5. Check Balances
@@ -480,32 +496,23 @@ curl -X POST "$API_URL/yields/base-usdc-aave-v3-lending/balances" \
 |----------|--------|-------|
 | OpenClaw | Native | Full support with Bankr wallet for signing |
 | ClawHub | Native | Primary distribution via clawhub.ai |
-| Claude Code | Compatible | Install via `npx skills add yield-finder` |
-| Cursor / Codex / Copilot | Compatible | Install via `npx skills add yield-finder` |
+| Claude Code | Compatible | Install via `npx skills add yield-agent` |
+| Cursor / Codex / Copilot | Compatible | Install via `npx skills add yield-agent` |
 | Any agent framework | Compatible | Point agent at SKILL.md |
 
 ## Integration with Wallet Skills
 
-After building transactions, hand off to any wallet skill for signing:
-
-```bash
-wallet_skill=$(openclaw.skills.load 'wallet-skill')
-
-$wallet_skill.signAndSendTransactions({
-  network: "base",
-  transactions: [...]
-})
-```
+After building transactions, hand off to any wallet skill for signing. The action response contains `transactions[]` — pass each transaction's `unsignedTransaction` to your wallet for signing and broadcasting. After broadcast, submit the transaction hash via `PUT /v1/transactions/{txId}/submit-hash` so the API can track status.
 
 ### Bankr Integration (OpenClaw Native)
 
 If using Bankr as your wallet, submit unsigned transactions directly via Bankr's API:
 
 ```bash
-# 1. Build unsigned transaction with yield-finder
-ACTION=$(./scripts/enter-position.sh base-usdc-aave-v3-lending 0xBankrWallet 100000000)
+# 1. Build unsigned transaction with yield-agent
+ACTION=$(./scripts/enter-position.sh base-usdc-aave-v3-lending 0xBankrWallet '{"amount":"100"}')
 
-# 2. Extract the unsigned transaction from the Action response
+# 2. Extract the unsigned transaction from the ActionDto response
 UNSIGNED_TX=$(echo "$ACTION" | jq -r '.transactions[0].unsignedTransaction')
 
 # 3. Submit to Bankr for signing and broadcasting
@@ -520,13 +527,13 @@ curl -X POST "https://api.bankr.bot/agent/submit" \
 1. User: "Lend 100 USDC on Aave Base"
 2. Yield skill discovers yields: `./scripts/find-yields.sh base USDC`
 3. User selects: "base-usdc-aave-v3-lending"
-4. Yield skill enters position: `./scripts/enter-position.sh base-usdc-aave-v3-lending 0xWallet 100000000`
+4. Yield skill enters position: `./scripts/enter-position.sh base-usdc-aave-v3-lending 0xWallet '{"amount":"100"}'`
 5. Yield skill returns Action with unsigned transaction(s)
 6. AI agent detects transactions need signing
 7. AI loads appropriate wallet skill (Bankr, Privy, circle-wallet, etc.)
-8. For each transaction in sequence: parse `unsignedTransaction` JSON string
-9. Wallet skill signs transaction locally
-10. Submit signed transaction: `POST /v1/transactions/{txId}/submit` with `{ signedTransaction }`
+8. For each transaction in sequence: pass `unsignedTransaction` to wallet (format varies by chain)
+9. Wallet skill signs and broadcasts the transaction
+10. Submit the tx hash: `PUT /v1/transactions/{txId}/submit-hash` with `{ "hash": "0x..." }`
 11. Poll `GET /v1/transactions/{txId}` until status is CONFIRMED or FAILED
 12. User can view status on block explorer via `explorerUrl`
 
@@ -536,7 +543,7 @@ This skill produces unsigned transactions compatible with any wallet. Recommende
 
 | Wallet | Tier | Integration | Signs Arbitrary Tx | Agent Framework | How It Connects |
 |--------|------|-------------|-------------------|-----------------|-----------------|
-| **Bankr** | Platform | Native | Yes | Yes | Zero config on OpenClaw. Submit endpoint accepts unsigned tx directly from yield-finder output. |
+| **Bankr** | Platform | Native | Yes | Yes | Zero config on OpenClaw. Submit endpoint accepts unsigned tx directly from yield-agent output. |
 | **Privy** | Enterprise | Skill | Yes | Yes | `clawhub install privy-agentic-wallets`. Configure PRIVY_APP_ID + PRIVY_APP_SECRET. Policy engine enforces spending limits, chain restrictions, contract allowlists. |
 | **Coinbase AgentKit** | Enterprise | SDK | Yes | Yes | SDK provides wallet send/sign methods for parsed unsigned tx. Smart Wallets support tx batching. Gasless on Base. |
 | **Crossmint** | Enterprise | SDK | Yes | Yes | GOAT SDK provides DeFi protocol plugins. Custodial wallet API supports tx signing. On-chain spending limits. |
@@ -625,15 +632,13 @@ See full docs: [docs.privy.io/recipes/agent-integrations/openclaw-agentic-wallet
 
 ### What Gets Passed to Wallet Skill
 
-The `unsignedTransaction` field type is `string | object | null`. Its encoding varies by chain family. The wallet skill must detect the chain from the `network` field and handle accordingly.
+Each transaction in the action response has:
+- `unsignedTransaction`: the data to sign (format varies by chain — see "Unsigned Transaction Formats by Chain")
+- `network`: which chain it's for
+- `stepIndex`: execution order
+- `id`: the transaction ID (needed for `PUT /v1/transactions/{id}/submit-hash` after broadcasting)
 
-The wallet skill handles:
-- Detecting the chain family from the transaction's `network` field
-- Deserializing the unsigned transaction (JSON parse for EVM, hex decode for Cosmos, etc.)
-- Gas limit safety margin (increase by 30% for EVM)
-- Nonce management for sequential transactions
-- Transaction signing with the appropriate algorithm
-- Blockchain broadcast
+The wallet skill is responsible for signing, gas management, nonce handling, and broadcasting.
 
 ## Unsigned Transaction Formats by Chain
 
@@ -875,13 +880,13 @@ Tron is EVM-compatible, so the format follows the EVM structure. Uses `ethers.Co
 
 ### Transaction Submission Flow
 
-After signing each transaction, submit it to the API for tracking:
+After signing and broadcasting each transaction, submit the **transaction hash** to the API for tracking:
 
 ```bash
-curl -X POST "$API_URL/transactions/{transactionId}/submit" \
+curl -X PUT "$API_URL/transactions/{transactionId}/submit-hash" \
   -H "x-api-key: $API_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"signedTransaction": "0xSignedTxData..."}'
+  -d '{"hash": "0xTransactionHash..."}'
 ```
 
 Then poll for confirmation:
@@ -890,7 +895,8 @@ curl -X GET "$API_URL/transactions/{transactionId}" \
   -H "x-api-key: $API_KEY"
 ```
 
-Status values: `NOT_FOUND`, `CREATED`, `BLOCKED`, `WAITING_FOR_SIGNATURE`, `SIGNED`, `BROADCASTED`, `PENDING`, `CONFIRMED`, `FAILED`, `SKIPPED`
+Poll until status reaches `CONFIRMED` (success) or `FAILED` (error). Full status enum is in `references/openapi.yaml` → `TransactionStatus`.
+
 
 ## When to Use Wallet Skills
 
@@ -908,7 +914,7 @@ Wallet skills like Bankr, Privy, or circle-wallet handle all signing.
 
 ## Response Formats
 
-### Yields Response
+### YieldDto Response
 
 ```json
 {
@@ -954,7 +960,7 @@ Wallet skills like Bankr, Privy, or circle-wallet handle all signing.
 }
 ```
 
-### Action Response (Enter/Exit/Manage)
+### ActionDto Response (Enter/Exit/Manage)
 
 ```json
 {
@@ -963,8 +969,8 @@ Wallet skills like Bankr, Privy, or circle-wallet handle all signing.
   "type": "STAKE",
   "yieldId": "base-usdc-aave-v3-lending",
   "address": "0xUserWallet",
-  "amount": "100000000",
-  "amountRaw": "100000000000000000000000000",
+  "amount": "100",
+  "amountRaw": "100000000",
   "amountUsd": "100.00",
   "status": "CREATED",
   "executionPattern": "synchronous",
@@ -1008,7 +1014,7 @@ Wallet skills like Bankr, Privy, or circle-wallet handle all signing.
       "structuredTransaction": null
     }
   ],
-  "rawArguments": { "amount": "100000000" },
+  "rawArguments": { "amount": "100" },
   "createdAt": "2025-01-15T10:30:00Z",
   "completedAt": null
 }
@@ -1043,7 +1049,7 @@ All enum values (`TransactionType`, `TransactionStatus`, `ActionStatus`, `Action
 - Execution pattern is usually `synchronous` — submit transactions one by one, wait for each to confirm before submitting the next
 - Poll `GET /v1/transactions/{id}` until status reaches a terminal state (`CONFIRMED` or `FAILED`)
 
-### Balances Response
+### YieldBalancesDto Response
 
 ```json
 {
@@ -1072,7 +1078,7 @@ All enum values (`TransactionType`, `TransactionStatus`, `ActionStatus`, `Action
 }
 ```
 
-**BalanceType values:** `active`, `entering`, `exiting`, `withdrawable`, `claimable`, `locked`
+Balance types are defined in `references/openapi.yaml` → `BalanceType`.
 
 ### Aggregate Balances (cross-yield scanning)
 
@@ -1090,7 +1096,7 @@ curl -X POST "$API_URL/yields/balances" \
   }'
 ```
 
-### Validators Response
+### ValidatorDto Response
 
 ```json
 {
@@ -1118,63 +1124,25 @@ curl -X POST "$API_URL/yields/balances" \
 
 ## Supported Networks
 
-- Ethereum (mainnet)
-- Base
-- Arbitrum
-- Optimism
-- Polygon
-- Avalanche C-Chain
-- Binance Smart Chain
-- Gnosis
-- zkSync
-- Linea
-- Sonic
-- Cosmos
-- Osmosis
-- Solana
-- Polkadot
-- Sui
-- Aptos
-- TON
-- Near
-- Tezos
-- Tron
-- Cardano
-- Stellar
-- 80+ networks total
-
-### Network Details
-
-| Network | ID | Gas Cost | Speed |
-|---------|-----|----------|-------|
-| Base | base | Very Low | Fast |
-| Arbitrum | arbitrum | Low | Fast |
-| Polygon | polygon | Low | Medium |
-| Ethereum | ethereum | High | Slow |
-| Optimism | optimism | Low | Fast |
-| Solana | solana | Very Low | Fast |
+80+ networks. Discover them via `GET /v1/networks` — returns each network's `id`, `name`, `category` (evm/cosmos/substrate/misc), and `logoURI`.
 
 ## Best Practices
 
-1. Always specify network for clarity ("on Base")
+1. Always fetch the yield and read its schema before calling any action
 2. Check balance before entering positions
 3. Start with small amounts to test
-4. Transactions require user wallet signing
-5. Gas costs vary by network (Base/Polygon = cheapest)
-6. Use amounts as strings with proper decimals (USDC = 6 decimals, ETH = 18 decimals)
-7. Addresses must be valid checksummed addresses for EVM chains
-8. Increase gas limit by 30% for safety margin
-9. For multi-transaction actions (approve + stake), manage nonces sequentially
-10. Poll transaction status until CONFIRMED before proceeding to next transaction
+4. Amounts are human-readable strings ("100" for 100 USDC, "1" for 1 ETH)
+5. Execute transactions in exact `stepIndex` order — wait for CONFIRMED before proceeding to next
+6. Signing and gas management are the wallet skill's responsibility, not this skill's
 
 ## Common Patterns
 
 ### Research -> Enter Flow
-1. "Find USDC yields on Base" (discovery)
-2. User picks yield
-3. "Enter 100 USDC into base-usdc-aave-v3-lending" (transaction build)
-4. Wallet skill handles signing
-5. Submit signed transaction, poll for confirmation
+1. Discover yields: `find-yields.sh base USDC`
+2. Inspect the yield: `get-yield-info.sh <yieldId>` — read `mechanics.arguments.enter`
+3. Enter position: `enter-position.sh <yieldId> <address> '{"amount":"100"}'`
+4. Wallet skill signs each transaction in `stepIndex` order
+5. Submit signed transactions, poll for confirmation
 
 ### Portfolio Check
 1. "Check my Aave balance" → `./check-portfolio.sh base-usdc-aave-v3-lending 0xWallet`
@@ -1190,14 +1158,9 @@ curl -X POST "$API_URL/yields/balances" \
 
 ## Error Handling
 
-| Code | Error | Meaning | Fix |
-|------|-------|---------|-----|
-| 400 | Bad Request | Invalid parameters | Verify yieldId and amount format. Ensure amount is a raw integer string, not a number or decimal. |
-| 401 | Unauthorized | Invalid/missing API key | Check YIELDS_API_KEY env variable or config.json apiKey field. |
-| 403 | Forbidden | Geolocation restrictions | Access denied from certain regions. Check region restrictions. |
-| 404 | Not Found | Yield/Action/TX not found | Verify the resource exists. Check yieldId spelling. |
-| 429 | Rate Limit | Too many requests | Wait and retry (60,000 req/min limit). Respect the x-ratelimit-reset header. |
-| 500 | Server Error | Internal error | Retry or contact support. |
+The API returns structured error responses with `message`, `error`, and `statusCode` fields. Read the `message` — it tells you exactly what went wrong. Error response shapes are documented in `references/openapi.yaml` under each endpoint's error responses (400, 401, 404, 429, 500).
+
+When a 429 (rate limit) is returned, respect the `retry-after` and `x-ratelimit-reset` headers before retrying.
 
 ## Complete API Endpoint Reference
 
@@ -1226,8 +1189,8 @@ All endpoints from the OpenAPI spec (`references/openapi.yaml`):
 ### Transactions
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/v1/transactions/{transactionId}/submit` | Submit signed transaction for broadcast |
-| PUT | `/v1/transactions/{transactionId}/submit-hash` | Submit just the tx hash (if broadcast externally) |
+| PUT | `/v1/transactions/{transactionId}/submit-hash` | Submit the tx hash after broadcasting |
+| POST | `/v1/transactions/{transactionId}/submit` | Submit full signed transaction for API to broadcast |
 | GET | `/v1/transactions/{transactionId}` | Get transaction status |
 
 ### Portfolio
@@ -1246,9 +1209,9 @@ Networks are categorized into families (from `NetworkDto.category`):
 
 ## Important Request Details
 
-- **Amounts**: Always use strings (not numbers) for precision. Include proper decimals (USDC = 6, ETH = 18).
+- **Amounts**: Human-readable strings ("100" for 100 USDC, "1" for 1 ETH). The API handles decimal conversion.
 - **Addresses**: Must be valid checksummed addresses for EVM chains.
-- **Base URL**: https://api.yield.xyz/v1
+- **Base URL**: https://api.yield.xyz
 - **Content-Type**: application/json for all POST/PUT requests.
 - **Auth Header**: x-api-key (lowercase)
 - **unsignedTransaction**: `string | object | null` — encoding varies by chain family (see "Unsigned Transaction Formats by Chain").
@@ -1258,19 +1221,17 @@ Networks are categorized into families (from `NetworkDto.category`):
 | Field | Env Override | Required | Description |
 |-------|-------------|----------|-------------|
 | apiKey | YIELDS_API_KEY | Yes | Production API key from dashboard.yield.xyz |
-| apiUrl | YIELDS_API_URL | No | Default: https://api.yield.xyz/v1 |
+| apiUrl | YIELDS_API_URL | No | Default: https://api.yield.xyz |
 | defaultNetwork | YIELD_NETWORK | No | Default network filter (e.g., base) |
 | slippage | YIELD_SLIPPAGE | No | Basis points (Default: 50 = 0.5%) |
 
 ## Troubleshooting
 
-**Transaction Reverts:** Check slippage settings. Default is 0.5%. For volatile assets, increase to 1%. Also ensure gas limit has a 30% safety margin.
+Read the API error `message` — it tells you exactly what went wrong. Common issues:
 
-**"Bad Request" on Amounts:** Ensure you aren't sending "1.5". Send "1500000" (for USDC with 6 decimals). Amount must be a raw integer string.
-
-**Empty Yield List:** Check network spelling. Use `base` not `Base`. IDs are always lowercase.
-
-**Multi-Transaction Actions Fail:** Some actions (like entering a vault) produce multiple transactions (APPROVE + STAKE). Process them sequentially - wait for each to be CONFIRMED before submitting the next. Increment nonce for each transaction.
+- **Empty yield list:** Check network spelling (`base` not `Base`). IDs are always lowercase.
+- **Action fails:** Did you read `mechanics.arguments` first? Pass only the fields the schema requires.
+- **Multi-transaction actions fail:** Execute transactions in exact `stepIndex` order. Wait for each to reach `CONFIRMED` before submitting the next.
 
 ## Constraints
 
