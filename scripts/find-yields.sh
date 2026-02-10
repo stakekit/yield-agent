@@ -82,7 +82,7 @@ if [ "$SUMMARY" = true ]; then
   COUNT=$(echo "$RESPONSE" | jq '.items | length')
   echo "Yields on $NETWORK${TOKEN:+ for $TOKEN} (showing $COUNT of $TOTAL)"
   echo ""
-  printf "%-55s | %-8s | %-8s | %-4s | %s\n" "ID" "Type" "APY" "Dec" "Min Deposit"
+  printf "%-55s | %-8s | %-8s | %-4s | %s\n" "ID" "Type" "Rate" "Dec" "Min Deposit"
   printf "%-55s-+-%-8s-+-%-8s-+-%-4s-+-%s\n" "-------------------------------------------------------" "--------" "--------" "----" "------------"
 
   echo "$RESPONSE" | jq -r '.items[] |
