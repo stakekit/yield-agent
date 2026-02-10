@@ -11,19 +11,19 @@
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 CONFIG_DIR=""
 for dir in "${SCRIPT_DIR}/.." "${HOME}/.openclaw/skills/yield-agent" "${HOME}/.clawhub/skills/yield-agent" "${HOME}/.clawdbot/skills/yield-agent"; do
-  if [ -f "${dir}/config.json" ]; then
+  if [ -f "${dir}/skill.json" ]; then
     CONFIG_DIR="$dir"
     break
   fi
 done
 if [ -z "$CONFIG_DIR" ]; then
-  echo "Error: config.json not found. Run from the yield-agent directory or install to ~/.clawhub/skills/yield-agent/"
+  echo "Error: skill.json not found. Run from the yield-agent directory or install to ~/.clawhub/skills/yield-agent/"
   exit 1
 fi
 
 # Load config (supports env var overrides)
-API_KEY="${YIELDS_API_KEY:-$(jq -r '.apiKey' "${CONFIG_DIR}/config.json")}"
-API_URL="${YIELDS_API_URL:-$(jq -r '.apiUrl' "${CONFIG_DIR}/config.json")}"
+API_KEY="${YIELDS_API_KEY:-$(jq -r '.api.apiKey' "${CONFIG_DIR}/skill.json")}"
+API_URL="${YIELDS_API_URL:-$(jq -r '.api.baseUrl' "${CONFIG_DIR}/skill.json")}"
 
 # Check for --summary flag in any position
 SUMMARY=false
@@ -37,7 +37,7 @@ for arg in "$@"; do
 done
 
 # Parse arguments (excluding --summary)
-NETWORK="${ARGS[0]:-${YIELD_NETWORK:-$(jq -r '.defaultNetwork // "base"' "${CONFIG_DIR}/config.json")}}"
+NETWORK="${ARGS[0]:-${YIELD_NETWORK:-$(jq -r '.defaults.network // "base"' "${CONFIG_DIR}/skill.json")}}"
 TOKEN=${ARGS[1]:-}
 LIMIT=${ARGS[2]:-20}
 OFFSET=${ARGS[3]:-0}
@@ -73,7 +73,7 @@ if echo "$RESPONSE" | jq -e '.error // .message' > /dev/null 2>&1; then
   echo ""
   echo "Common causes:"
   echo "  - Invalid network name (use: ethereum, base, arbitrum, polygon, etc.)"
-  echo "  - API key issue (check config.json or YIELDS_API_KEY env var)"
+  echo "  - API key issue (check skill.json or YIELDS_API_KEY env var)"
   exit 1
 fi
 

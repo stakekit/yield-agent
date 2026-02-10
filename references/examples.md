@@ -539,14 +539,14 @@ The API handles decimal conversion internally. No need to know token decimals.
 
 ### Environment Variable Overrides
 
-Override config.json values without editing the file:
+Override skill.json values without editing the file:
 
 ```bash
 export YIELDS_API_KEY="your-custom-key"
 export YIELDS_API_URL="https://api.stakek.it"
 export YIELD_NETWORK="ethereum"
 
-./scripts/find-yields.sh    # Uses env vars instead of config.json
+./scripts/find-yields.sh    # Uses env vars instead of skill.json
 ```
 
 ---
@@ -627,7 +627,7 @@ Signing, gas management, and nonce handling are the wallet skill's responsibilit
 
 ## Implementation Checklist
 
-- [ ] API key in config.json (included by default)
+- [ ] API key in skill.json (included by default)
 - [ ] Scripts executable (`chmod +x scripts/*.sh`)
 - [ ] `jq` and `curl` installed
 - [ ] Wallet skill configured for signing

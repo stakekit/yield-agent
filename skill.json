@@ -1,0 +1,77 @@
+{
+  "name": "yield-agent",
+  "version": "1.0.0",
+  "description": "On-chain yield discovery, transaction building, and portfolio management via the Yield.xyz API across 80+ networks.",
+  "author": "yield-xyz",
+  "license": "MIT",
+  "homepage": "https://yield.xyz",
+  "keywords": [
+    "yield",
+    "staking",
+    "lending",
+    "defi",
+    "on-chain",
+    "web3",
+    "portfolio",
+    "transactions"
+  ],
+  "sbom": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "required": true,
+        "description": "Main skill definition and index"
+      },
+      {
+        "path": "references/safety.md",
+        "required": true,
+        "description": "Pre-execution safety checks and constraints"
+      },
+      {
+        "path": "HEARTBEAT.md",
+        "required": false,
+        "description": "Periodic position monitoring add-on"
+      },
+      {
+        "path": "references/superskill.md",
+        "required": false,
+        "description": "40 advanced agent capabilities add-on"
+      },
+      {
+        "path": "references/openapi.yaml",
+        "required": true,
+        "description": "OpenAPI spec — source of truth for all types and schemas"
+      }
+    ]
+  },
+  "openclaw": {
+    "emoji": "📈",
+    "category": "finance",
+    "requires": {
+      "bins": ["curl", "jq"],
+      "env": ["YIELDS_API_KEY"]
+    },
+    "triggers": [
+      "find yields",
+      "stake",
+      "lend",
+      "deposit",
+      "yield farming",
+      "check balance",
+      "claim rewards",
+      "exit position",
+      "withdraw",
+      "APY",
+      "staking",
+      "lending",
+      "vault",
+      "restaking",
+      "on-chain yield"
+    ]
+  },
+  "api": {
+    "baseUrl": "https://api.yield.xyz",
+    "authHeader": "x-api-key",
+    "apiKey": "b40dd85f-d89e-48da-a2b3-ec04fae106dc"
+  }
+}

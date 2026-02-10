@@ -48,14 +48,15 @@ If an action produces multiple transactions (e.g., APPROVAL + STAKE), execute th
 
 ## Safety Rules
 
-1. **NO Private Keys:** Never ask for, store, or log private keys. This skill only builds unsigned transactions.
-2. **Wallet Handoff:** Pass each transaction's `unsignedTransaction` to the wallet skill. Never attempt to sign.
-3. **Balance Check First:** Verify user balance before entering positions.
-4. **User Confirmation:** Present transaction details and get user approval before signing.
-5. **Rate Limits:** Respect the `retry-after` header on 429 responses.
-6. **Key Security:** API keys should be in config.json or YIELDS_API_KEY env var, not in code.
-7. **Sequential Processing:** Never submit multiple transactions simultaneously. Wait for confirmation between each.
-8. **Passthrough Integrity:** Never modify the `passthrough` string from `pendingActions[]`. It is opaque.
+1. **NEVER modify `unsignedTransaction`.** Sign exactly what the API returns. Do not alter any field — not gas, not nonce, not value, not data. Modifying a transaction can result in **loss of funds**. If something looks wrong, throw an error and ask the user — do not attempt to fix it.
+2. **NO Private Keys.** Never ask for, store, or log private keys. This skill only builds unsigned transactions.
+3. **Wallet Handoff.** Pass `unsignedTransaction` to the wallet skill exactly as received. Never attempt to sign.
+4. **Balance Check First.** Verify user balance before entering positions.
+5. **User Confirmation.** Present transaction details and get user approval before signing.
+6. **Rate Limits.** Respect the `retry-after` header on 429 responses.
+7. **Key Security.** API keys should be in skill.json or YIELDS_API_KEY env var, not in code.
+8. **Sequential Processing.** Never submit multiple transactions simultaneously. Wait for confirmation between each.
+9. **Passthrough Integrity.** Never modify the `passthrough` string from `pendingActions[]`. It is opaque.
 
 ## Cross-Skill Safety
 
@@ -68,8 +69,4 @@ When combining yield-agent with wallet skills:
 
 ## Golden Rule
 
-> This skill is a **Transaction Builder**, not a **Signer**.
->
-> The Yield.xyz skill constructs unsigned transactions. Signing and broadcasting
-> is always delegated to the wallet skill. This separation ensures private keys
-> are never exposed to yield logic.
+> Build transactions. Pass them unmodified to the wallet skill for signing.
