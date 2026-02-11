@@ -2,7 +2,7 @@
 name: yield-agent
 displayName: YieldAgent
 description: On-chain yield discovery, transaction building, and portfolio management via the Yield.xyz API. Use when the user wants to find yields, stake, lend, deposit into vaults, check balances, claim rewards, exit positions, compare APYs, or manage any on-chain yield across 80+ networks.
-version: 1.0.2
+version: 1.0.3
 author: yield-xyz
 homepage: https://yield.xyz
 metadata: {"openclaw":{"emoji":"📈","requires":{"bins":["curl","jq"]}}}
