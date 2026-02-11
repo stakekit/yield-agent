@@ -22,9 +22,8 @@ if [ -z "$YIELD_ID" ] || [ -z "$ADDRESS" ] || [ -z "$ARGS_JSON" ]; then
   exit 1
 fi
 
-sanitize() { [[ "$1" =~ [^a-zA-Z0-9._\-] ]] && echo "Error: Invalid characters: $1" >&2 && exit 1; }
+sanitize() { [[ "$1" =~ [^a-zA-Z0-9._\-] ]] && { echo "Error: Invalid characters: $1" >&2; exit 1; } || true; }
 sanitize "$YIELD_ID"
-[[ "$ADDRESS" =~ ^[a-zA-Z0-9._\-]+$ ]] || { echo "Error: Invalid address" >&2; exit 1; }
 echo "$ARGS_JSON" | jq '.' > /dev/null 2>&1 || { echo "Error: arguments_json must be valid JSON" >&2; exit 1; }
 
 PAYLOAD=$(jq -n --arg yieldId "$YIELD_ID" --arg address "$ADDRESS" --argjson arguments "$ARGS_JSON" \

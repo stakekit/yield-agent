@@ -21,7 +21,7 @@ if [ -z "$YIELD_ID" ]; then
   exit 1
 fi
 
-sanitize() { [[ "$1" =~ [^a-zA-Z0-9._\-] ]] && echo "Error: Invalid characters: $1" >&2 && exit 1; }
+sanitize() { [[ "$1" =~ [^a-zA-Z0-9._\-] ]] && { echo "Error: Invalid characters: $1" >&2; exit 1; } || true; }
 sanitize "$YIELD_ID"
 [[ "$LIMIT" =~ ^[0-9]+$ ]] || { echo "Error: limit must be a number" >&2; exit 1; }
 

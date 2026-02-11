@@ -21,7 +21,7 @@ if [ -z "$YIELD_ID" ]; then
   exit 1
 fi
 
-sanitize() { [[ "$1" =~ [^a-zA-Z0-9._\-] ]] && echo "Error: Invalid characters: $1" >&2 && exit 1; }
+sanitize() { [[ "$1" =~ [^a-zA-Z0-9._\-] ]] && { echo "Error: Invalid characters: $1" >&2; exit 1; } || true; }
 sanitize "$YIELD_ID"
 
 RESPONSE=$(curl -s -w "\n%{http_code}" -X GET \

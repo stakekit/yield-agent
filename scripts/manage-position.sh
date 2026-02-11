@@ -24,10 +24,9 @@ if [ -z "$YIELD_ID" ] || [ -z "$ADDRESS" ] || [ -z "$ACTION" ] || [ -z "$PASSTHR
   exit 1
 fi
 
-sanitize() { [[ "$1" =~ [^a-zA-Z0-9._\-] ]] && echo "Error: Invalid characters: $1" >&2 && exit 1; }
+sanitize() { [[ "$1" =~ [^a-zA-Z0-9._\-] ]] && { echo "Error: Invalid characters: $1" >&2; exit 1; } || true; }
 sanitize "$YIELD_ID"
 sanitize "$ACTION"
-[[ "$ADDRESS" =~ ^[a-zA-Z0-9._\-]+$ ]] || { echo "Error: Invalid address" >&2; exit 1; }
 
 PAYLOAD=$(jq -n --arg yieldId "$YIELD_ID" --arg address "$ADDRESS" --arg action "$ACTION" \
   --arg passthrough "$PASSTHROUGH" --argjson arguments "$ARGS_JSON" \
