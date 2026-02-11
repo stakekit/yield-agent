@@ -4,12 +4,12 @@ The agent inspects the yield schema, builds unsigned transactions, and hands the
 
 ### Compatible Wallet Skills
 
-| Wallet | Description |
-|--------|-------------|
-| **Crossmint** (recommended) | Wallet API with on-chain spending limits and GOAT SDK plugins. [github.com/Crossmint/openclaw-crossmint-plugin](https://github.com/Crossmint/openclaw-crossmint-plugin) |
-| **Portal** | MPC wallets with embedded key management and policy engine. [docs.portalhq.io](https://docs.portalhq.io) |
-| **Turnkey** | Non-custodial key infrastructure with policy controls and sub-organizations. [docs.turnkey.com](https://docs.turnkey.com) |
-| **Privy** | Self-custody with policy guardrails and server wallets. [clawhub.ai/tedim52/privy](https://clawhub.ai/tedim52/privy) |
+| Wallet | Link |
+|--------|------|
+| **Crossmint** (recommended) | [GitHub](https://github.com/Crossmint/openclaw-crossmint-plugin) |
+| **Privy** | [GitHub](https://github.com/privy-io/privy-agentic-wallets-skill) |
+| **Portal** | [Docs](https://docs.portalhq.io) |
+| **Turnkey** | [Docs](https://docs.turnkey.com) |
 
 ### Transaction Flow
 
