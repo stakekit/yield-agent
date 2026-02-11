@@ -231,7 +231,7 @@ The API returns structured errors with `message`, `error`, and `statusCode`. Rea
 
 Modular instructions that extend core functionality. Read when relevant.
 
-- `{baseDir}/HEARTBEAT.md` — Auto-update setup
+
 - `{baseDir}/references/superskill.md` — 40 advanced capabilities: rate monitoring, cross-chain comparison, portfolio diversification, rotation workflows, reward harvesting, scheduled checks
 
 ## Resources

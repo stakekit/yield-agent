@@ -11,7 +11,6 @@ chmod +x ~/.openclaw/skills/yield-agent/scripts/*.sh
 
 A free shared API key is included in `skill.json`. For production, replace with your own from [dashboard.yield.xyz](https://dashboard.yield.xyz) or set `YIELDS_API_KEY` env var.
 
-Auto-updates recommended — see `HEARTBEAT.md` to set up.
 
 ## Quick Start
 
@@ -44,7 +43,7 @@ Auto-updates recommended — see `HEARTBEAT.md` to set up.
 
 - `SKILL.md` — Main skill definition (agent reads this first)
 - `skill.json` — Manifest, API key, triggers
-- `HEARTBEAT.md` — Auto-update setup
+
 - `scripts/` — 7 bash scripts
 - `references/openapi.yaml` — OpenAPI spec (source of truth)
 - `references/safety.md` — Safety checks and guardrails

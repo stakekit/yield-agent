@@ -28,11 +28,6 @@
         "description": "Pre-execution safety checks and constraints"
       },
       {
-        "path": "HEARTBEAT.md",
-        "required": false,
-        "description": "Periodic position monitoring add-on"
-      },
-      {
         "path": "references/superskill.md",
         "required": false,
         "description": "40 advanced agent capabilities add-on"
