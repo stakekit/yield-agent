@@ -42,5 +42,6 @@ fi
 
 echo "$RESPONSE" | jq '.'
 echo ""
-echo "NEXT: For each transaction above, sign → broadcast → submit hash → poll until CONFIRMED."
+echo "NEXT: For each transaction, sign EXACTLY as returned → broadcast → submit hash → poll until CONFIRMED."
+echo "Do NOT modify the unsigned transaction — WILL RESULT IN PERMANENT LOSS OF FUNDS. If anything needs changing, request a new action."
 echo "$RESPONSE" | jq -r '.transactions[] | "  curl -X PUT \"'${API_URL}'/v1/transactions/\(.id)/submit-hash\" -H \"x-api-key: '${API_KEY}'\" -H \"Content-Type: application/json\" -d '\''{\"hash\":\"0xYOUR_TX_HASH\"}'\''"'
