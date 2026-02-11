@@ -38,8 +38,6 @@ if echo "$RESPONSE" | jq -e '.error // .message' > /dev/null 2>&1; then
 fi
 
 echo "$RESPONSE" | jq '.'
-TX_COUNT=$(echo "$RESPONSE" | jq '.transactions | length')
 echo ""
-echo "NEXT: For each transaction, sign → broadcast → submit hash:"
-echo "  PUT /v1/transactions/{txId}/submit-hash {\"hash\":\"0x...\"}"
-echo "  Transactions: $TX_COUNT"
+echo "NEXT: For each transaction above, sign → broadcast → submit hash → poll until CONFIRMED."
+echo "$RESPONSE" | jq -r '.transactions[] | "  curl -X PUT \"'${API_URL}'/v1/transactions/\(.id)/submit-hash\" -H \"x-api-key: '${API_KEY}'\" -H \"Content-Type: application/json\" -d '\''{\"hash\":\"0xYOUR_TX_HASH\"}'\''"'

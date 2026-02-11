@@ -377,17 +377,17 @@ These are real conversation flows showing how an agent uses the yield-agent skil
 
 ---
 
-### Conversation 9: Bankr Swap-Then-Yield (OpenClaw)
+### Conversation 9: Swap-Then-Yield
 
 **User:** "I have ETH but I want to earn yield on USDC. Can you handle the swap and deposit?"
 
-**Agent thinks:** I'll use Bankr to swap ETH to USDC, then enter a high-yield vault position.
+**Agent thinks:** I'll swap ETH to USDC via the wallet skill, then enter a high-yield vault position.
 
 **Agent responds:**
 
 > Sure! Here's what I'll do:
 >
-> 1. Swap your ETH to USDC on Base using Bankr (low gas)
+> 1. Swap your ETH to USDC on Base via wallet skill
 > 2. Deposit the USDC into the highest-yielding vault (Morpho Flagship at 5.72%)
 >
 > How much ETH would you like to convert?
@@ -396,7 +396,7 @@ These are real conversation flows showing how an agent uses the yield-agent skil
 
 **Agent runs:**
 ```bash
-# Step 1: Swap ETH to USDC via wallet skill (Bankr, etc.)
+# Step 1: Swap ETH to USDC via wallet skill
 # Result: ~1,300 USDC received
 
 # Step 2: Find best yield

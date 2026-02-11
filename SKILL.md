@@ -2,7 +2,7 @@
 name: yield-agent
 displayName: YieldAgent
 description: On-chain yield discovery, transaction building, and portfolio management via the Yield.xyz API. Use when the user wants to find yields, stake, lend, deposit into vaults, check balances, claim rewards, exit positions, compare APYs, or manage any on-chain yield across 80+ networks.
-version: 1.0.3
+version: 0.1.2
 author: yield-xyz
 homepage: https://yield.xyz
 metadata: {"openclaw":{"emoji":"📈","requires":{"bins":["curl","jq"]}}}
@@ -142,10 +142,10 @@ Access the complete on-chain yield landscape through Yield.xyz's unified API. Di
 ./scripts/get-yield-info.sh base-usdc-aave-v3-lending
 
 # Enter a position (amounts are human-readable)
-./scripts/enter-position.sh base-usdc-aave-v3-lending 0xWallet '{"amount":"100"}'
+./scripts/enter-position.sh base-usdc-aave-v3-lending 0xYOUR_ADDRESS '{"amount":"100"}'
 
 # Check balances and pending actions
-./scripts/check-portfolio.sh base-usdc-aave-v3-lending 0xWallet
+./scripts/check-portfolio.sh base-usdc-aave-v3-lending 0xYOUR_ADDRESS
 ```
 
 ## Scripts
@@ -219,7 +219,7 @@ Detailed reference files — read on demand when you need specifics.
 
 - **API types and schemas:** `{baseDir}/references/openapi.yaml` — source of truth for all DTOs, enums, request/response shapes
 - **Chain transaction formats:** `{baseDir}/references/chain-formats.md` — `unsignedTransaction` encoding per chain family (EVM, Cosmos, Solana, Substrate, etc.)
-- **Wallet integration:** `{baseDir}/references/wallet-integration.md` — Bankr, Privy, Coinbase AgentKit, signing flow, wallet setup
+- **Wallet integration:** `{baseDir}/references/wallet-integration.md` — Crossmint, Portal, Turnkey, Privy, signing flow
 - **Agent conversation examples:** `{baseDir}/references/examples.md` — 10 conversation patterns with real yield IDs
 - **Safety checks:** `{baseDir}/references/safety.md` — pre-execution checks, constraints
 

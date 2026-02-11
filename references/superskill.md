@@ -113,7 +113,7 @@ Single JSON file. Positions keyed by yieldId for O(1) lookup. Rate history cappe
   "wallets": {
     "0x0bbe5ebc254b60a373a4a578ea3a64d2a1e35e3a": {
       "label": "main",
-      "type": "bankr"
+      "type": "crossmint"
     }
   },
 
