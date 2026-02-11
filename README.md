@@ -102,7 +102,7 @@ yield-agent/
 ## Requirements
 
 - `curl` and `jq`
-- A wallet skill for signing (Crossmint, Privy, Bankr, or any EVM/multi-chain wallet)
+- A wallet skill for signing (Crossmint, Portal, Turnkey, Privy, or any compatible wallet)
 
 ---
 
