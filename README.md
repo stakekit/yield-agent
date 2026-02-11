@@ -121,6 +121,14 @@ Yield.xyz is **SOC 2 compliant** ([trust.yield.xyz](https://trust.yield.xyz/)). 
 
 ---
 
+## Important Notice & Risk Disclosure
+
+YieldAgent is a software tool designed to help users discover yield opportunities and construct transactions using the Yield.xyz infrastructure. It is not a financial advisor, broker, dealer, or fiduciary. Yield.xyz does not provide financial, investment, tax, accounting, or legal advice. Nothing on this website, within the YieldAgent interface, or in any related materials constitutes a recommendation, solicitation, endorsement, or offer to buy, sell, hold, or otherwise transact in any digital asset or to pursue any particular investment strategy.
+
+All actions taken through YieldAgent are initiated and executed at your sole discretion. You are fully responsible for evaluating and understanding the risks involved, including but not limited to smart contract vulnerabilities, protocol failures, counterparty exposure, market volatility, liquidity constraints, loss of private keys, technical errors, and changing regulatory requirements. Digital assets and decentralized finance involve substantial risk, including the potential for total loss of funds. Only use funds you can afford to lose. You should conduct your own research and consult qualified professional advisors before making financial decisions.
+
+By using YieldAgent, you acknowledge and accept these risks.
+
 ## License
 
 Apache 2.0
