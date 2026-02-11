@@ -2,103 +2,99 @@
 name: yield-agent
 displayName: YieldAgent
 description: On-chain yield discovery, transaction building, and portfolio management via the Yield.xyz API. Use when the user wants to find yields, stake, lend, deposit into vaults, check balances, claim rewards, exit positions, compare APYs, or manage any on-chain yield across 80+ networks.
-version: 1.0.2
+version: 1.0.3
 author: yield-xyz
-metadata:
-  clawhub:
-    icon: "yield"
-    homepage: "https://yield.xyz"
-    requires:
-      bins: ["curl", "jq"]
-    tools:
-      - name: find-yields
-        description: Discover yield opportunities by network and token
-        entry: scripts/find-yields.sh
-        args:
-          - name: network
-            description: The blockchain network (e.g., base, ethereum, arbitrum, solana)
-            required: true
-          - name: token
-            description: The token symbol (e.g., USDC, ETH). Optional - omit to see all yields on network.
-            required: false
-          - name: limit
-            description: Items per page (default 20, max 100)
-            required: false
-          - name: offset
-            description: Pagination offset (default 0)
-            required: false
-      - name: enter-position
-        description: Enter a yield position. Fetch the yield first (GET /v1/yields/{yieldId}) to discover required arguments from mechanics.arguments.enter
-        entry: scripts/enter-position.sh
-        args:
-          - name: yieldId
-            description: The unique yield identifier (e.g., base-usdc-aave-v3-lending)
-            required: true
-          - name: address
-            description: The user wallet address
-            required: true
-          - name: arguments_json
-            description: JSON string of arguments from the yield's mechanics.arguments.enter schema. Always includes "amount". Other fields (validatorAddress, inputToken, etc.) depend on the yield.
-            required: true
-      - name: exit-position
-        description: Exit a yield position. Fetch the yield first (GET /v1/yields/{yieldId}) to discover required arguments from mechanics.arguments.exit
-        entry: scripts/exit-position.sh
-        args:
-          - name: yieldId
-            description: The unique yield identifier to exit from
-            required: true
-          - name: address
-            description: The user wallet address
-            required: true
-          - name: arguments_json
-            description: JSON string of arguments from the yield's mechanics.arguments.exit schema. Always includes "amount". Other fields depend on the yield.
-            required: true
-      - name: manage-position
-        description: Manage a yield position (claim, restake, redelegate, etc.). Discover available actions from pendingActions[] in the balances response.
-        entry: scripts/manage-position.sh
-        args:
-          - name: yieldId
-            description: The unique yield identifier
-            required: true
-          - name: address
-            description: The user wallet address
-            required: true
-          - name: action
-            description: The action type from pendingActions[].type in the balances response
-            required: true
-          - name: passthrough
-            description: The passthrough string from pendingActions[].passthrough in the balances response
-            required: true
-          - name: arguments_json
-            description: JSON string of arguments from pendingActions[].arguments schema, if the action requires additional input
-            required: false
-      - name: check-portfolio
-        description: Check yield balances for a specific yield position
-        entry: scripts/check-portfolio.sh
-        args:
-          - name: yieldId
-            description: The unique yield identifier to check balances for (e.g., base-usdc-aave-v3-lending)
-            required: true
-          - name: address
-            description: The user wallet address to check balances for
-            required: true
-      - name: get-yield-info
-        description: Fetch full yield metadata including required arguments schema, entry limits, validator requirements, and token details
-        entry: scripts/get-yield-info.sh
-        args:
-          - name: yieldId
-            description: The unique yield identifier to inspect (e.g., base-usdc-aave-v3-lending)
-            required: true
-      - name: list-validators
-        description: List available validators for staking yields that require validator selection
-        entry: scripts/list-validators.sh
-        args:
-          - name: yieldId
-            description: The unique yield identifier to list validators for
-            required: true
-          - name: limit
-            description: Maximum validators to return (default 20)
-            required: false
+homepage: https://yield.xyz
+metadata: {"openclaw":{"emoji":"📈","requires":{"bins":["curl","jq"]}}}
+tools:
+  - name: find-yields
+    description: Discover yield opportunities by network and token
+    entry: scripts/find-yields.sh
+    args:
+      - name: network
+        description: The blockchain network (e.g., base, ethereum, arbitrum, solana)
+        required: true
+      - name: token
+        description: The token symbol (e.g., USDC, ETH). Optional - omit to see all yields on network.
+        required: false
+      - name: limit
+        description: Items per page (default 20, max 100)
+        required: false
+      - name: offset
+        description: Pagination offset (default 0)
+        required: false
+  - name: enter-position
+    description: Enter a yield position. Fetch the yield first (GET /v1/yields/{yieldId}) to discover required arguments from mechanics.arguments.enter
+    entry: scripts/enter-position.sh
+    args:
+      - name: yieldId
+        description: The unique yield identifier (e.g., base-usdc-aave-v3-lending)
+        required: true
+      - name: address
+        description: The user wallet address
+        required: true
+      - name: arguments_json
+        description: JSON string of arguments from the yield's mechanics.arguments.enter schema. Always includes "amount". Other fields (validatorAddress, inputToken, etc.) depend on the yield.
+        required: true
+  - name: exit-position
+    description: Exit a yield position. Fetch the yield first (GET /v1/yields/{yieldId}) to discover required arguments from mechanics.arguments.exit
+    entry: scripts/exit-position.sh
+    args:
+      - name: yieldId
+        description: The unique yield identifier to exit from
+        required: true
+      - name: address
+        description: The user wallet address
+        required: true
+      - name: arguments_json
+        description: JSON string of arguments from the yield's mechanics.arguments.exit schema. Always includes "amount". Other fields depend on the yield.
+        required: true
+  - name: manage-position
+    description: Manage a yield position (claim, restake, redelegate, etc.). Discover available actions from pendingActions[] in the balances response.
+    entry: scripts/manage-position.sh
+    args:
+      - name: yieldId
+        description: The unique yield identifier
+        required: true
+      - name: address
+        description: The user wallet address
+        required: true
+      - name: action
+        description: The action type from pendingActions[].type in the balances response
+        required: true
+      - name: passthrough
+        description: The passthrough string from pendingActions[].passthrough in the balances response
+        required: true
+      - name: arguments_json
+        description: JSON string of arguments from pendingActions[].arguments schema, if the action requires additional input
+        required: false
+  - name: check-portfolio
+    description: Check yield balances for a specific yield position
+    entry: scripts/check-portfolio.sh
+    args:
+      - name: yieldId
+        description: The unique yield identifier to check balances for (e.g., base-usdc-aave-v3-lending)
+        required: true
+      - name: address
+        description: The user wallet address to check balances for
+        required: true
+  - name: get-yield-info
+    description: Fetch full yield metadata including required arguments schema, entry limits, validator requirements, and token details
+    entry: scripts/get-yield-info.sh
+    args:
+      - name: yieldId
+        description: The unique yield identifier to inspect (e.g., base-usdc-aave-v3-lending)
+        required: true
+  - name: list-validators
+    description: List available validators for staking yields that require validator selection
+    entry: scripts/list-validators.sh
+    args:
+      - name: yieldId
+        description: The unique yield identifier to list validators for
+        required: true
+      - name: limit
+        description: Maximum validators to return (default 20)
+        required: false
 ---
 
 # YieldAgent by Yield.xyz
@@ -139,26 +135,18 @@ Access the complete on-chain yield landscape through Yield.xyz's unified API. Di
 ## Quick Start
 
 ```bash
-cd yield-agent && chmod +x scripts/*.sh
-
-# 1. Find the best yields
+# Discover yields on a network
 ./scripts/find-yields.sh base USDC
 
-# 2. Enter a position (amounts are human-readable — "100" means 100 USDC)
-./scripts/enter-position.sh base-usdc-aave-v3-lending 0xYOUR_WALLET '{"amount":"100"}'
+# Inspect a yield's schema before entering
+./scripts/get-yield-info.sh base-usdc-aave-v3-lending
 
-# 3. The response contains unsigned transaction(s) to pass to your wallet skill for signing
+# Enter a position (amounts are human-readable)
+./scripts/enter-position.sh base-usdc-aave-v3-lending 0xWallet '{"amount":"100"}'
+
+# Check balances and pending actions
+./scripts/check-portfolio.sh base-usdc-aave-v3-lending 0xWallet
 ```
-
-## Amounts
-
-Amounts are **human-readable strings**. Use the amount as the user would say it:
-
-- `"1"` for 1 ETH
-- `"100"` for 100 USDC
-- `"0.5"` for 0.5 SOL
-
-The API handles decimal conversion internally.
 
 ## Scripts
 
@@ -239,19 +227,11 @@ Detailed reference files — read on demand when you need specifics.
 
 The API returns structured errors with `message`, `error`, and `statusCode`. Read the `message`. Error shapes are in `{baseDir}/references/openapi.yaml`. Respect `retry-after` on 429s.
 
-## Constraints
-
-1. **NO Private Keys.** Never ask for or handle user private keys.
-2. **Wallet Handoff.** Pass unsigned transactions to the wallet skill. Never sign yourself.
-3. **ALWAYS submit hash after every broadcast.** Balances won't update until you do. This is the most common mistake.
-4. **Sequential execution.** Process transactions in `stepIndex` order.
-5. **Read the schema.** Always fetch the yield and read `mechanics.arguments` before calling any action.
-
 ## Add-on Modules
 
 Modular instructions that extend core functionality. Read when relevant.
 
-- `{baseDir}/HEARTBEAT.md` — Periodic position monitoring, rate alerts, reward claiming prompts
+
 - `{baseDir}/references/superskill.md` — 40 advanced capabilities: rate monitoring, cross-chain comparison, portfolio diversification, rotation workflows, reward harvesting, scheduled checks
 
 ## Resources

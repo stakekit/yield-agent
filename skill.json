@@ -1,9 +1,9 @@
 {
   "name": "yield-agent",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "On-chain yield discovery, transaction building, and portfolio management via the Yield.xyz API across 80+ networks.",
   "author": "yield-xyz",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "homepage": "https://yield.xyz",
   "keywords": [
     "yield",
@@ -26,11 +26,6 @@
         "path": "references/safety.md",
         "required": true,
         "description": "Pre-execution safety checks and constraints"
-      },
-      {
-        "path": "HEARTBEAT.md",
-        "required": false,
-        "description": "Periodic position monitoring add-on"
       },
       {
         "path": "references/superskill.md",
@@ -71,6 +66,11 @@
   "api": {
     "baseUrl": "https://api.yield.xyz",
     "authHeader": "x-api-key",
-    "apiKey": "b40dd85f-d89e-48da-a2b3-ec04fae106dc"
+    "apiKey": "b40dd85f-d89e-48da-a2b3-ec04fae106dc",
+    "_apiKeyNote": "Free shared key for getting started. Replace with your own from dashboard.yield.xyz for production use."
+  },
+  "state": {
+    "dir": "state/",
+    "files": ["yield-cache.json", "yield-safety.json"]
   }
 }
