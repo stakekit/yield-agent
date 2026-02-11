@@ -5,6 +5,11 @@ On-chain yield discovery, transaction building, and portfolio management across 
 ## Install
 
 ```bash
+clawhub install yield-agent
+```
+
+Or manually:
+```bash
 git clone https://github.com/stakekit/yield-agent.git ~/.openclaw/skills/yield-agent
 chmod +x ~/.openclaw/skills/yield-agent/scripts/*.sh
 ```
@@ -54,6 +59,7 @@ A free shared API key is included in `skill.json`. For production, replace with 
 
 ## Links
 
+- [ClawHub](https://clawhub.ai/apurvmishra/yield-agent)
 - [API Docs](https://docs.yield.xyz)
 - [API Recipes](https://github.com/stakekit/api-recipes)
 - [Get API Key](https://dashboard.yield.xyz)
