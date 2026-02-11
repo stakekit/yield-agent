@@ -142,10 +142,10 @@ Access the complete on-chain yield landscape through Yield.xyz's unified API. Di
 ./scripts/get-yield-info.sh base-usdc-aave-v3-lending
 
 # Enter a position (amounts are human-readable)
-./scripts/enter-position.sh base-usdc-aave-v3-lending 0xWallet '{"amount":"100"}'
+./scripts/enter-position.sh base-usdc-aave-v3-lending 0xYOUR_ADDRESS '{"amount":"100"}'
 
 # Check balances and pending actions
-./scripts/check-portfolio.sh base-usdc-aave-v3-lending 0xWallet
+./scripts/check-portfolio.sh base-usdc-aave-v3-lending 0xYOUR_ADDRESS
 ```
 
 ## Scripts

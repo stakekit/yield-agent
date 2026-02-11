@@ -47,10 +47,10 @@ chmod +x ~/.openclaw/skills/yield-agent/scripts/*.sh
 ./scripts/get-yield-info.sh base-usdc-aave-v3-lending
 
 # Enter a position
-./scripts/enter-position.sh base-usdc-aave-v3-lending 0xWallet '{"amount":"100"}'
+./scripts/enter-position.sh base-usdc-aave-v3-lending 0xYOUR_ADDRESS '{"amount":"100"}'
 
 # Check balances
-./scripts/check-portfolio.sh base-usdc-aave-v3-lending 0xWallet
+./scripts/check-portfolio.sh base-usdc-aave-v3-lending 0xYOUR_ADDRESS
 ```
 
 A free shared API key is included in `skill.json`. For production, get your own from [dashboard.yield.xyz](https://dashboard.yield.xyz) or set `YIELDS_API_KEY` env var.
@@ -102,7 +102,7 @@ yield-agent/
 ## Requirements
 
 - `curl` and `jq`
-- A wallet skill for signing (Crossmint, Portal, Turnkey, Privy, or any compatible wallet)
+- A wallet for signing (Crossmint, Portal, Turnkey, Privy, or any compatible wallet)
 
 ---
 
