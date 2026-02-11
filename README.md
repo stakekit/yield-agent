@@ -5,7 +5,7 @@ On-chain yield discovery, transaction building, and portfolio management across 
 ## Install
 
 ```bash
-clawhub install yield-agent
+npx clawhub@latest install yield-agent
 ```
 
 Or manually:
