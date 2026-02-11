@@ -1,25 +1,22 @@
-# 📈 YieldAgent: On-Chain Yield Skill for AI Agents
+# YieldAgent by Yield.xyz
 
-**Discover, enter, exit, and manage on-chain yield positions across 2,600+ opportunities on 80+ networks.**
+**The yield layer for the agent era.**
 
-Built by [Yield.xyz](https://yield.xyz) · [ClawHub](https://clawhub.ai/apurvmishra/yield-agent) · [API Docs](https://docs.yield.xyz) · [GitHub](https://github.com/stakekit/yield-agent)
+2,988 yield opportunities. 75+ chains. One unified interface. Staking, lending, vaults, restaking, and liquidity pools — all via the Yield.xyz API. Secure, controlled access to on-chain yield for agents.
 
----
+Non-custodial. Schema-driven. Agent-native.
 
-## What is YieldAgent?
-
-YieldAgent is an AI agent skill that provides full access to the Yield.xyz API for on-chain yield operations. It builds unsigned transactions — your wallet skill handles signing.
+[agent.yield.xyz](https://agent.yield.xyz) · [ClawHub](https://clawhub.ai/apurvmishra/yield-agent) · [GitHub](https://github.com/stakekit/yield-agent)
 
 ### Core Capabilities
 
 | Capability | Description |
 |-----------|-------------|
-| **Discovery** | Find yields by network, token, provider, type across 80+ chains |
-| **Enter** | Build unsigned transactions to deposit into any yield |
-| **Exit** | Build unsigned transactions to withdraw from any yield |
-| **Manage** | Claim rewards, restake, redelegate, and more |
-| **Balances** | Check positions, pending actions, and rewards |
-| **Schema-driven** | Every yield describes its own arguments — the agent reads the schema, never guesses |
+| **Discover** | Query yields across every protocol and chain |
+| **Enter** | Build unsigned transactions to deposit — your wallet signs |
+| **Track** | View balances, accrued interest, pending actions |
+| **Manage** | Claim rewards, restake, redelegate |
+| **Exit** | Withdraw in one command |
 
 ---
 
@@ -114,9 +111,16 @@ Yield.xyz is **SOC 2 compliant** ([trust.yield.xyz](https://trust.yield.xyz/)). 
 
 ## Links
 
+- [agent.yield.xyz](https://agent.yield.xyz)
 - [ClawHub](https://clawhub.ai/apurvmishra/yield-agent)
 - [GitHub](https://github.com/stakekit/yield-agent)
 - [API Docs](https://docs.yield.xyz)
 - [API Recipes](https://github.com/stakekit/api-recipes)
 - [Get API Key](https://dashboard.yield.xyz)
 - [Yield.xyz](https://yield.xyz)
+
+---
+
+## License
+
+Apache 2.0
