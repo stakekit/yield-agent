@@ -2,7 +2,7 @@
 
 **Discover, enter, exit, and manage on-chain yield positions across 2,600+ opportunities on 80+ networks.**
 
-Built by [Yield.xyz](https://yield.xyz) (StakeKit) · [ClawHub](https://clawhub.ai/apurvmishra/yield-agent) · [API Docs](https://docs.yield.xyz) · [GitHub](https://github.com/stakekit/yield-agent)
+Built by [Yield.xyz](https://yield.xyz) · [ClawHub](https://clawhub.ai/apurvmishra/yield-agent) · [API Docs](https://docs.yield.xyz) · [GitHub](https://github.com/stakekit/yield-agent)
 
 ---
 
