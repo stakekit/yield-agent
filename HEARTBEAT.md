@@ -6,7 +6,11 @@
 
 ## Check for skill updates
 
-Check https://github.com/stakekit/yield-agent for the latest version. Compare against `skill.json` version. If newer, pull updates.
+```bash
+cd ~/.openclaw/skills/yield-agent && git fetch origin && git diff --quiet HEAD origin/main || git pull origin main
+```
+
+This pulls updates only if the remote has new commits. Run during heartbeat to stay current.
 
 ---
 

@@ -71,6 +71,11 @@
   "api": {
     "baseUrl": "https://api.yield.xyz",
     "authHeader": "x-api-key",
-    "apiKey": "b40dd85f-d89e-48da-a2b3-ec04fae106dc"
+    "apiKey": "b40dd85f-d89e-48da-a2b3-ec04fae106dc",
+    "_apiKeyNote": "Free shared key for getting started. Replace with your own from dashboard.yield.xyz for production use."
+  },
+  "state": {
+    "dir": "state/",
+    "files": ["yield-cache.json", "yield-safety.json"]
   }
 }

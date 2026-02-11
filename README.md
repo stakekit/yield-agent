@@ -2,11 +2,20 @@
 
 AI-powered on-chain yield discovery, transaction building, and portfolio management across 2,600+ opportunities on 80+ networks.
 
+## Install
+
+```bash
+git clone https://github.com/stakekit/yield-agent.git ~/.openclaw/skills/yield-agent
+```
+
+Or one-line:
+```bash
+git clone https://github.com/stakekit/yield-agent.git ~/.openclaw/skills/yield-agent && chmod +x ~/.openclaw/skills/yield-agent/scripts/*.sh
+```
+
 ## Quick Start
 
 ```bash
-cd yield-agent && chmod +x scripts/*.sh
-
 # Find yields
 ./scripts/find-yields.sh base USDC
 
@@ -14,7 +23,7 @@ cd yield-agent && chmod +x scripts/*.sh
 ./scripts/enter-position.sh base-usdc-aave-v3-lending 0xYOUR_ADDRESS '{"amount":"100"}'
 ```
 
-A free API key is included in `skill.json`.
+A free shared API key is included in `skill.json` for getting started. For production, replace it with your own from [dashboard.yield.xyz](https://dashboard.yield.xyz) or set `YIELDS_API_KEY` env var.
 
 ## Requirements
 

@@ -1,79 +1,46 @@
 #!/bin/bash
-
-# Yield.xyz Discovery Script
+# Discover yield opportunities — GET /v1/yields
+# Returns paginated list of YieldDto with rates, tokens, mechanics, and status.
 # Usage: ./find-yields.sh <network> [token] [limit] [offset] [--summary]
-# Example: ./find-yields.sh base USDC
-# Example: ./find-yields.sh ethereum
-# Example: ./find-yields.sh base USDC 50 0
-# Example: ./find-yields.sh base USDC --summary
 
-# Auto-detect config path: local (extracted ZIP) or installed (OpenClaw/ClawHub/Clawdbot)
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 CONFIG_DIR=""
 for dir in "${SCRIPT_DIR}/.." "${HOME}/.openclaw/skills/yield-agent" "${HOME}/.clawhub/skills/yield-agent" "${HOME}/.clawdbot/skills/yield-agent"; do
-  if [ -f "${dir}/skill.json" ]; then
-    CONFIG_DIR="$dir"
-    break
-  fi
+  [ -f "${dir}/skill.json" ] && CONFIG_DIR="$dir" && break
 done
-if [ -z "$CONFIG_DIR" ]; then
-  echo "Error: skill.json not found. Run from the yield-agent directory or install to ~/.clawhub/skills/yield-agent/"
-  exit 1
-fi
+[ -z "$CONFIG_DIR" ] && echo "Error: skill.json not found" && exit 1
 
-# Load config (supports env var overrides)
 API_KEY="${YIELDS_API_KEY:-$(jq -r '.api.apiKey' "${CONFIG_DIR}/skill.json")}"
 API_URL="${YIELDS_API_URL:-$(jq -r '.api.baseUrl' "${CONFIG_DIR}/skill.json")}"
 
-# Check for --summary flag in any position
-SUMMARY=false
-ARGS=()
+SUMMARY=false; ARGS=()
 for arg in "$@"; do
-  if [ "$arg" = "--summary" ]; then
-    SUMMARY=true
-  else
-    ARGS+=("$arg")
-  fi
+  [ "$arg" = "--summary" ] && SUMMARY=true || ARGS+=("$arg")
 done
 
-# Parse arguments (excluding --summary)
 NETWORK="${ARGS[0]:-${YIELD_NETWORK:-$(jq -r '.defaults.network // "base"' "${CONFIG_DIR}/skill.json")}}"
-TOKEN=${ARGS[1]:-}
-LIMIT=${ARGS[2]:-20}
-OFFSET=${ARGS[3]:-0}
+TOKEN=${ARGS[1]:-}; LIMIT=${ARGS[2]:-20}; OFFSET=${ARGS[3]:-0}
 
 if [ -z "$NETWORK" ]; then
-  echo "Error: Network required"
   echo "Usage: ./find-yields.sh <network> [token] [limit] [offset] [--summary]"
   echo "Example: ./find-yields.sh base USDC"
-  echo "Example: ./find-yields.sh base USDC --summary"
-  echo "Networks: ethereum, base, arbitrum, optimism, polygon, solana, avalanche-c, and 80+ more"
-  echo ""
-  echo "Flags:"
-  echo "  --summary  Show condensed table with ID, APY, decimals, and min deposit"
   exit 1
 fi
 
-# Build query string
+sanitize() { [[ "$1" =~ [^a-zA-Z0-9._\-] ]] && echo "Error: Invalid characters: $1" >&2 && exit 1; }
+sanitize "$NETWORK"
+[ ! -z "$TOKEN" ] && sanitize "$TOKEN"
+[[ "$LIMIT" =~ ^[0-9]+$ ]] || { echo "Error: limit must be a number" >&2; exit 1; }
+[[ "$OFFSET" =~ ^[0-9]+$ ]] || { echo "Error: offset must be a number" >&2; exit 1; }
+
 QUERY="network=${NETWORK}&limit=${LIMIT}&offset=${OFFSET}"
-if [ ! -z "$TOKEN" ]; then
-  QUERY="${QUERY}&token=${TOKEN}"
-fi
+[ ! -z "$TOKEN" ] && QUERY="${QUERY}&token=${TOKEN}"
 
-# Call API
-# Returns: { items: YieldDto[], total: number }
 RESPONSE=$(curl -s -X GET "${API_URL}/v1/yields?${QUERY}" \
-  -H "x-api-key: ${API_KEY}" \
-  -H "Content-Type: application/json")
+  -H "x-api-key: ${API_KEY}" -H "Content-Type: application/json")
 
-# Better error handling
 if echo "$RESPONSE" | jq -e '.error // .message' > /dev/null 2>&1; then
-  ERROR_MSG=$(echo "$RESPONSE" | jq -r '.message // .error // "Unknown error"')
-  echo "Error from Yield.xyz API: $ERROR_MSG"
-  echo ""
-  echo "Common causes:"
-  echo "  - Invalid network name (use: ethereum, base, arbitrum, polygon, etc.)"
-  echo "  - API key issue (check skill.json or YIELDS_API_KEY env var)"
+  echo "$RESPONSE" | jq -r '"Error: \(.message // .error)"'
   exit 1
 fi
 
@@ -84,7 +51,6 @@ if [ "$SUMMARY" = true ]; then
   echo ""
   printf "%-55s | %-8s | %-8s | %-4s | %s\n" "ID" "Type" "Rate" "Dec" "Min Deposit"
   printf "%-55s-+-%-8s-+-%-8s-+-%-4s-+-%s\n" "-------------------------------------------------------" "--------" "--------" "----" "------------"
-
   echo "$RESPONSE" | jq -r '.items[] |
     [
       .id,
@@ -92,8 +58,8 @@ if [ "$SUMMARY" = true ]; then
       (if .rewardRate.total then (.rewardRate.total * 100 | tostring | split(".") | .[0] + "." + (.[1] // "00" | .[:2]) + "%") else "N/A" end),
       (.token.decimals // "?" | tostring),
       (.mechanics.entryLimits.minimum // "none")
-    ] | @tsv' | while IFS=$'\t' read -r ID TYPE APY DECIMALS MIN; do
-    printf "%-55s | %-8s | %8s | %4s | %s\n" "$ID" "$TYPE" "$APY" "$DECIMALS" "$MIN"
+    ] | @tsv' | while IFS=$'\t' read -r ID TYPE RATE DECIMALS MIN; do
+    printf "%-55s | %-8s | %8s | %4s | %s\n" "$ID" "$TYPE" "$RATE" "$DECIMALS" "$MIN"
   done
 else
   echo "$RESPONSE" | jq '.'
