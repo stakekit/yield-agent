@@ -101,6 +101,20 @@ tools:
 
 Access the complete on-chain yield landscape through Yield.xyz's unified API. Discover 2600+ yields across staking, lending, vaults, restaking, and liquidity pools. Build transactions and manage positions across 80+ networks.
 
+## CRITICAL: Never Modify Transactions From The API
+
+> **DO NOT MODIFY `unsignedTransaction` returned by the API UNDER ANY CIRCUMSTANCES.**
+>
+> This includes changing: `value`, `data`, `to`, `gas`, `nonce`, or ANY field.
+>
+> **If the amount is wrong:** Request a NEW action from the API with the correct amount.
+> **If gas is insufficient:** Ask the user to add funds, then request a NEW action.
+> **If anything looks wrong:** STOP. Always request a new action with corrected arguments. Never attempt to "fix" an existing transaction.
+>
+> Modifying transaction calldata corrupts encoded parameters (addresses, amounts) and WILL RESULT IN PERMANENT LOSS OF FUNDS to unrecoverable addresses.
+
+---
+
 ## Key Rules
 
 > **The API is self-documenting.** Every yield describes its own requirements through the `YieldDto`. Before taking any action, always fetch the yield and inspect it. The `mechanics` field tells you everything: what arguments are needed (`mechanics.arguments.enter`, `.exit`), entry limits (`mechanics.entryLimits`), and what tokens are accepted (`inputTokens[]`). Never assume — always check the yield first.
@@ -128,9 +142,7 @@ Access the complete on-chain yield landscape through Yield.xyz's unified API. Di
 
 6. **Execute transactions in exact order.** If an action has multiple transactions, they are ordered by `stepIndex`. Wait for `CONFIRMED` before proceeding to the next. Never skip or reorder.
 
-7. **NEVER modify `unsignedTransaction`.** Sign exactly what the API returns. Do not alter gas, nonce, value, data, or any field. Modifying a transaction can result in loss of funds. If something looks wrong, throw an error — do not attempt to fix it.
-
-8. **Consult `{baseDir}/references/openapi.yaml` for types.** All enums, DTOs, and schemas are defined there. Do not hardcode values.
+7. **Consult `{baseDir}/references/openapi.yaml` for types.** All enums, DTOs, and schemas are defined there. Do not hardcode values.
 
 ## Quick Start
 
