@@ -102,7 +102,13 @@ yield-agent/
 ## Requirements
 
 - `curl` and `jq`
-- A wallet skill for signing (Privy, Bankr, Coinbase AgentKit, or any EVM/multi-chain wallet)
+- A wallet skill for signing (Crossmint, Privy, Bankr, or any EVM/multi-chain wallet)
+
+---
+
+## Security
+
+Yield.xyz is **SOC 2 compliant** ([trust.yield.xyz](https://trust.yield.xyz/)). A safe, controlled environment for AI agents to access on-chain yields.
 
 ---
 

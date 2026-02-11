@@ -219,7 +219,7 @@ Detailed reference files — read on demand when you need specifics.
 
 - **API types and schemas:** `{baseDir}/references/openapi.yaml` — source of truth for all DTOs, enums, request/response shapes
 - **Chain transaction formats:** `{baseDir}/references/chain-formats.md` — `unsignedTransaction` encoding per chain family (EVM, Cosmos, Solana, Substrate, etc.)
-- **Wallet integration:** `{baseDir}/references/wallet-integration.md` — Bankr, Privy, Coinbase AgentKit, signing flow, wallet setup
+- **Wallet integration:** `{baseDir}/references/wallet-integration.md` — Crossmint, Privy, Bankr, signing flow, wallet setup
 - **Agent conversation examples:** `{baseDir}/references/examples.md` — 10 conversation patterns with real yield IDs
 - **Safety checks:** `{baseDir}/references/safety.md` — pre-execution checks, constraints
 

@@ -29,10 +29,9 @@ The wallet skill handles signing, gas, nonce, and broadcasting. Never modify `un
 
 | Wallet | Integration | How It Connects |
 |--------|-------------|-----------------|
+| **Crossmint** | SDK | Signs and broadcasts via custodial wallet API. Smart wallets with on-chain spending limits. |
 | **Privy** | Skill | `clawhub install privy`. Server wallets with policy guardrails. Signs and broadcasts transactions. |
-| **Bankr** | Native | Zero config on OpenClaw. Signs and broadcasts unsigned transactions. |
-| **Coinbase AgentKit** | SDK | Signs and broadcasts. Smart Wallets support tx batching. Gasless on Base. |
-| **Crossmint** | SDK | Signs and broadcasts via custodial wallet API. |
+| **Bankr** | Skill | Signs and broadcasts unsigned transactions. |
 
 ### Privy Agentic Wallets Setup
 
