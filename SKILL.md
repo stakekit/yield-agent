@@ -105,13 +105,13 @@ Access the complete on-chain yield landscape through Yield.xyz's unified API. Di
 
 > **DO NOT MODIFY `unsignedTransaction` returned by the API UNDER ANY CIRCUMSTANCES.**
 >
-> This includes changing: `value`, `data`, `to`, `gas`, `nonce`, or ANY field.
+> Do not change, reformat, or "fix" any part of it — not addresses, amounts, fees, encoding, or any other field, on any chain.
 >
 > **If the amount is wrong:** Request a NEW action from the API with the correct amount.
 > **If gas is insufficient:** Ask the user to add funds, then request a NEW action.
 > **If anything looks wrong:** STOP. Always request a new action with corrected arguments. Never attempt to "fix" an existing transaction.
 >
-> Modifying transaction calldata WILL RESULT IN PERMANENT LOSS OF FUNDS.
+> Modifying `unsignedTransaction` WILL RESULT IN PERMANENT LOSS OF FUNDS.
 
 ---
 
