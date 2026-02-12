@@ -111,7 +111,7 @@ Access the complete on-chain yield landscape through Yield.xyz's unified API. Di
 > **If gas is insufficient:** Ask the user to add funds, then request a NEW action.
 > **If anything looks wrong:** STOP. Always request a new action with corrected arguments. Never attempt to "fix" an existing transaction.
 >
-> Modifying transaction calldata corrupts encoded parameters (addresses, amounts) and WILL RESULT IN PERMANENT LOSS OF FUNDS to unrecoverable addresses.
+> Modifying transaction calldata WILL RESULT IN PERMANENT LOSS OF FUNDS.
 
 ---
 
